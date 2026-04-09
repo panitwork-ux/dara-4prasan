@@ -1,25 +1,27 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useUser } from '../context/UserContext'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { apiFetch } from '../utils/api'
 import { ROLE_LABELS } from '../utils/roles'
 
-const ROLE_BADGE_COLORS = {
-  admin: 'bg-red-100 text-red-700',
-  dept_head: 'bg-orange-100 text-orange-700',
-  asst_director: 'bg-pink-100 text-pink-700',
-  guidance: 'bg-purple-100 text-purple-700',
-  discipline: 'bg-blue-100 text-blue-700',
-  academic: 'bg-teal-100 text-teal-700',
-  teacher: 'bg-gray-100 text-gray-600',
+const ROLE_COLORS = {
+  admin:         { bg:'#fee2e2', text:'#991b1b', dot:'#ef4444' },
+  dept_head:     { bg:'#fff7ed', text:'#9a3412', dot:'#f97316' },
+  asst_director: { bg:'#fdf4ff', text:'#7e22ce', dot:'#a855f7' },
+  guidance:      { bg:'#f0fdf4', text:'#166534', dot:'#22c55e' },
+  discipline:    { bg:'#eff6ff', text:'#1e40af', dot:'#3b82f6' },
+  academic:      { bg:'#f0fdfa', text:'#134e4a', dot:'#14b8a6' },
+  teacher:       { bg:'#f8fafc', text:'#475569', dot:'#94a3b8' },
 }
 
 export default function Navbar() {
   const { user, logout } = useAuth()
   const { profile, isAdmin } = useUser()
   const navigate = useNavigate()
+  const location = useLocation()
   const [logoUrl, setLogoUrl] = useState(null)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     apiFetch('getSettings', {}).then(res => {
@@ -27,50 +29,76 @@ export default function Navbar() {
     }).catch(() => {})
   }, [])
 
-  const handleLogout = async () => {
-    await logout()
-    navigate('/login')
-  }
+  const handleLogout = async () => { await logout(); navigate('/login') }
+  const isActive = (path) => location.pathname === path
+
+  const roleColor = ROLE_COLORS[profile?.role] || ROLE_COLORS.teacher
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-3">
+    <nav style={{
+      background:'#fff', borderBottom:'1px solid #e2e8f0',
+      boxShadow:'0 1px 3px rgba(0,0,0,0.06)',
+      position:'sticky', top:0, zIndex:100,
+      fontFamily:"'Sarabun',sans-serif",
+    }}>
+      <div style={{maxWidth:'1100px',margin:'0 auto',padding:'0 20px',display:'flex',alignItems:'center',justifyContent:'space-between',height:'60px'}}>
+        {/* Logo + Title */}
+        <Link to="/dashboard" style={{display:'flex',alignItems:'center',gap:'10px',textDecoration:'none'}}>
           {logoUrl ? (
-            <img src={logoUrl} alt="โลโก้" className="w-9 h-9 object-contain rounded-lg" />
+            <img src={logoUrl} alt="logo" style={{width:'36px',height:'36px',objectFit:'contain',borderRadius:'10px'}}/>
           ) : (
-            <div className="w-9 h-9 bg-blue-700 rounded-lg flex items-center justify-center text-white font-bold text-sm">ด</div>
+            <div style={{width:'36px',height:'36px',background:'linear-gradient(135deg,#1d4ed8,#6366f1)',borderRadius:'10px',display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:'800',fontSize:'16px',flexShrink:0}}>ด</div>
           )}
           <div>
-            <div className="font-semibold text-gray-800 text-sm leading-tight">ระบบ 4 ประสาน 3 สายใย</div>
-            <div className="text-xs text-gray-500">โรงเรียนดาราวิทยาลัย</div>
+            <div style={{fontWeight:'700',fontSize:'14px',color:'#0f172a',lineHeight:'1.2'}}>ระบบ 4 ประสาน 3 สายใย</div>
+            <div style={{fontSize:'11px',color:'#94a3b8',lineHeight:'1'}}>DARA ACADEMY</div>
           </div>
         </Link>
 
-        <div className="flex items-center gap-2">
-          <Link to="/dashboard" className="text-sm text-gray-600 hover:text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors">
-            หน้าหลัก
-          </Link>
-          <Link to="/history" className="text-sm text-gray-600 hover:text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors">
-            ประวัติ
-          </Link>
+        {/* Nav Links */}
+        <div style={{display:'flex',alignItems:'center',gap:'4px'}}>
+          {[
+            { to:'/dashboard', label:'หน้าหลัก' },
+            { to:'/history', label:'ประวัติ' },
+          ].map(link => (
+            <Link key={link.to} to={link.to} style={{
+              padding:'6px 14px', borderRadius:'8px', fontSize:'13px', fontWeight:'500',
+              textDecoration:'none', transition:'all 0.15s',
+              background: isActive(link.to) ? '#eff6ff' : 'transparent',
+              color: isActive(link.to) ? '#1d4ed8' : '#64748b',
+              fontFamily:"'Sarabun',sans-serif",
+            }}>{link.label}</Link>
+          ))}
           {isAdmin && (
-            <Link to="/admin" className="text-sm text-red-600 hover:text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors">
-              ตั้งค่า
-            </Link>
+            <Link to="/admin" style={{
+              padding:'6px 14px', borderRadius:'8px', fontSize:'13px', fontWeight:'500',
+              textDecoration:'none', transition:'all 0.15s',
+              background: isActive('/admin') ? '#fef2f2' : 'transparent',
+              color: isActive('/admin') ? '#dc2626' : '#ef4444',
+              fontFamily:"'Sarabun',sans-serif",
+            }}>⚙ ตั้งค่า</Link>
           )}
-          <div className="flex items-center gap-2 ml-1 pl-3 border-l border-gray-200">
-            <img src={user?.photoURL} alt="" className="w-8 h-8 rounded-full flex-shrink-0" referrerPolicy="no-referrer" />
-            <div className="hidden sm:block">
-              <div className="text-xs font-medium text-gray-700 leading-tight">{profile?.name || user?.displayName}</div>
-              <span className={`inline-block text-xs px-1.5 py-0.5 rounded-full mt-0.5 ${ROLE_BADGE_COLORS[profile?.role] || 'bg-gray-100 text-gray-600'}`}>
+        </div>
+
+        {/* User */}
+        <div style={{display:'flex',alignItems:'center',gap:'10px',paddingLeft:'12px',borderLeft:'1px solid #e2e8f0'}}>
+          <img src={user?.photoURL} alt="" style={{width:'34px',height:'34px',borderRadius:'50%',flexShrink:0,border:'2px solid #e2e8f0'}} referrerPolicy="no-referrer"/>
+          <div style={{display:'flex',flexDirection:'column',gap:'2px'}}>
+            <div style={{fontSize:'13px',fontWeight:'600',color:'#1e293b',lineHeight:'1',whiteSpace:'nowrap',maxWidth:'140px',overflow:'hidden',textOverflow:'ellipsis'}}>
+              {profile?.name || user?.displayName}
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:'4px'}}>
+              <div style={{width:'6px',height:'6px',borderRadius:'50%',background:roleColor.dot,flexShrink:0}}/>
+              <span style={{fontSize:'11px',color:roleColor.text,background:roleColor.bg,padding:'1px 7px',borderRadius:'100px',whiteSpace:'nowrap'}}>
                 {ROLE_LABELS[profile?.role] || 'ครูที่ปรึกษา'}
               </span>
             </div>
-            <button onClick={handleLogout} className="text-xs text-red-400 hover:text-red-600 ml-1 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors">
-              ออก
-            </button>
           </div>
+          <button onClick={handleLogout} style={{
+            fontSize:'12px',color:'#94a3b8',background:'none',border:'1px solid #e2e8f0',
+            borderRadius:'8px',padding:'5px 10px',cursor:'pointer',whiteSpace:'nowrap',
+            fontFamily:"'Sarabun',sans-serif",
+          }}>ออก</button>
         </div>
       </div>
     </nav>
