@@ -60,6 +60,11 @@ export default function Login() {
           {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด้วย Google'}
         </button>
         <p style={{fontSize:'11px',color:'#475569',marginTop:'20px'}}>สำหรับบุคลากรโรงเรียนดาราวิทยาลัยเท่านั้น</p>
+        <button onClick={() => navigate('/admin')} style={{
+          marginTop:'16px', background:'none', border:'none',
+          color:'rgba(255,255,255,0.2)', fontSize:'11px', cursor:'pointer',
+          fontFamily:"'Sarabun',sans-serif", letterSpacing:'0.05em',
+        }}>⚙ Admin</button>
       </div>
     </div>
   )

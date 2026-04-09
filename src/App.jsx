@@ -49,9 +49,7 @@ function AppRoutes() {
         <Route path="/history" element={
           <PrivateRoute><Layout><History /></Layout></PrivateRoute>
         } />
-        <Route path="/admin" element={
-          <AdminRoute><Layout><AdminSettings /></Layout></AdminRoute>
-        } />
+        <Route path="/admin" element={<AdminSettings />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
