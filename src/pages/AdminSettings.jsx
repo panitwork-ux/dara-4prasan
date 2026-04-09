@@ -5,12 +5,16 @@ import { apiFetch } from '../utils/api'
 const ADMIN_PIN = '100625'
 
 const ROLE_OPTIONS = [
-  { value: 'teacher',       label: 'ครูที่ปรึกษา / ครูที่พบปัญหา', color:'#64748b', bg:'#f8fafc' },
-  { value: 'dept_head',     label: 'หัวหน้าแผนก ม.ปลาย',           color:'#9a3412', bg:'#fff7ed' },
-  { value: 'asst_director', label: 'ผู้ช่วย ผอ. ฝ่ายกิจการนักเรียน', color:'#7e22ce', bg:'#fdf4ff' },
+  { value: 'teacher',           label: 'ครูที่ปรึกษา / ครูที่พบปัญหา',              color:'#64748b', bg:'#f8fafc' },
+  { value: 'head_kindergarten', label: 'หัวหน้าแผนกอนุบาล',                      color:'#854d0e', bg:'#fefce8' },
+  { value: 'head_primary_low',  label: 'หัวหน้าแผนกประถมศึกษาตอนต้น',             color:'#9a3412', bg:'#fff7ed' },
+  { value: 'head_primary_high', label: 'หัวหน้าแผนกประถมศึกษาตอนปลาย',            color:'#7c2d12', bg:'#fef3c7' },
+  { value: 'head_junior',       label: 'หัวหน้าแผนกมัธยมศึกษาตอนต้น',             color:'#1e40af', bg:'#dbeafe' },
+  { value: 'head_senior',       label: 'หัวหน้าแผนกมัธยมศึกษาตอนปลาย',            color:'#6b21a8', bg:'#fdf4ff' },
+  { value: 'asst_director',     label: 'ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน',      color:'#7e22ce', bg:'#fdf4ff' },
   { value: 'guidance',      label: 'ฝ่ายแนะแนว',                   color:'#166534', bg:'#f0fdf4' },
-  { value: 'discipline',    label: 'ฝ่ายปกครอง',                   color:'#1e40af', bg:'#eff6ff' },
-  { value: 'academic',      label: 'ฝ่ายวิชาการ',                  color:'#134e4a', bg:'#f0fdfa' },
+  { value: 'discipline',        label: 'ฝ่ายพัฒนาวินัย',                           color:'#1e40af', bg:'#eff6ff' },
+  { value: 'religious',         label: 'ฝ่ายศาสนกิจ',                              color:'#134e4a', bg:'#f0fdfa' },
   { value: 'admin',         label: 'Admin',                        color:'#991b1b', bg:'#fef2f2' },
 ]
 
@@ -433,11 +437,15 @@ export default function AdminSettings() {
 
 function roleDesc(role) {
   return {
-    teacher: 'สร้างเอกสาร กรอกข้อมูล เซ็นชื่อ',
-    dept_head: 'รับเอกสาร เซ็นรับรอง หรือส่งคืน',
-    asst_director: 'รับเอกสาร เซ็นรับรอง ส่งต่อฝ่าย (สร้างเอกสาร 3)',
-    guidance: 'รับเอกสาร 3 ดำเนินการ เซ็น',
-    discipline: 'รับเอกสาร 3 ดำเนินการ เซ็น',
-    academic: 'รับเอกสาร 3 ดำเนินการ เซ็น',
+    teacher:           'สร้างเอกสาร กรอกข้อมูล เซ็นชื่อ',
+    head_kindergarten: 'รับเอกสาร เซ็นรับรอง หรือส่งคืน',
+    head_primary_low:  'รับเอกสาร เซ็นรับรอง หรือส่งคืน',
+    head_primary_high: 'รับเอกสาร เซ็นรับรอง หรือส่งคืน',
+    head_junior:       'รับเอกสาร เซ็นรับรอง หรือส่งคืน',
+    head_senior:       'รับเอกสาร เซ็นรับรอง หรือส่งคืน',
+    asst_director:     'รับเอกสาร เซ็นรับรอง ส่งต่อฝ่าย (สร้างเอกสาร 3)',
+    guidance:          'รับเอกสาร 3 ดำเนินการ เซ็น',
+    discipline:        'รับเอกสาร 3 ดำเนินการ เซ็น',
+    religious:         'รับเอกสาร 3 ดำเนินการ เซ็น',
   }[role] || ''
 }

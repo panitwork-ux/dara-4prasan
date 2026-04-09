@@ -6,13 +6,17 @@ import { apiFetch } from '../utils/api'
 import { ROLE_LABELS } from '../utils/roles'
 
 const ROLE_COLORS = {
-  admin:         { bg:'#fee2e2', text:'#991b1b', dot:'#ef4444' },
-  dept_head:     { bg:'#fff7ed', text:'#9a3412', dot:'#f97316' },
-  asst_director: { bg:'#fdf4ff', text:'#7e22ce', dot:'#a855f7' },
-  guidance:      { bg:'#f0fdf4', text:'#166534', dot:'#22c55e' },
-  discipline:    { bg:'#eff6ff', text:'#1e40af', dot:'#3b82f6' },
-  academic:      { bg:'#f0fdfa', text:'#134e4a', dot:'#14b8a6' },
-  teacher:       { bg:'#f8fafc', text:'#475569', dot:'#94a3b8' },
+  admin:             { bg:'#fee2e2', text:'#991b1b', dot:'#ef4444' },
+  head_kindergarten: { bg:'#fefce8', text:'#854d0e', dot:'#eab308' },
+  head_primary_low:  { bg:'#fff7ed', text:'#9a3412', dot:'#f97316' },
+  head_primary_high: { bg:'#fef3c7', text:'#7c2d12', dot:'#f59e0b' },
+  head_junior:       { bg:'#dbeafe', text:'#1e40af', dot:'#3b82f6' },
+  head_senior:       { bg:'#fdf4ff', text:'#6b21a8', dot:'#a855f7' },
+  asst_director:     { bg:'#fdf4ff', text:'#7e22ce', dot:'#a855f7' },
+  guidance:          { bg:'#f0fdf4', text:'#166534', dot:'#22c55e' },
+  discipline:        { bg:'#eff6ff', text:'#1e40af', dot:'#3b82f6' },
+  religious:         { bg:'#f0fdfa', text:'#134e4a', dot:'#14b8a6' },
+  teacher:           { bg:'#f8fafc', text:'#475569', dot:'#94a3b8' },
 }
 
 export default function Navbar() {
