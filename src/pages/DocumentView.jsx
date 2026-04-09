@@ -7,8 +7,7 @@ import AuditLog from '../components/AuditLog'
 import StatusBadge from '../components/StatusBadge'
 import { format } from 'date-fns'
 import { th } from 'date-fns/locale'
-import jsPDF from 'jspdf'
-import html2canvas from 'html2canvas'
+import { buildPrintHTML } from '../utils/printForm'
 
 const DEPT_OPTIONS = [
   { value: 'guidance', label: 'ฝ่ายแนะแนว' },
@@ -95,15 +94,24 @@ export default function DocumentView() {
   }
 
   const handleExportPDF = async () => {
-    const el = document.getElementById('doc-content')
-    if (!el) return
-    const canvas = await html2canvas(el, { scale: 2 })
-    const imgData = canvas.toDataURL('image/png')
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-    const pdfWidth = pdf.internal.pageSize.getWidth()
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-    pdf.save(`เอกสาร_${doc?.studentName || id}.pdf`)
+    // ดึง logoUrl จาก settings
+    let logoUrl = null
+    try {
+      const { apiFetch } = await import('../utils/api')
+      const res = await apiFetch('getSettings', {})
+      if (res.success && res.logoUrl) logoUrl = res.logoUrl
+    } catch {}
+
+    const html = buildPrintHTML(doc, logoUrl)
+    const printWindow = window.open('', '_blank', 'width=900,height=700')
+    printWindow.document.write(html)
+    printWindow.document.close()
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.focus()
+        printWindow.print()
+      }, 500)
+    }
   }
 
   const canSign = (doc) => {
@@ -142,7 +150,7 @@ export default function DocumentView() {
           </div>
         </div>
         <button onClick={handleExportPDF} className="border border-gray-300 text-gray-600 px-3 py-2 rounded-xl text-xs hover:bg-gray-50 transition-colors">
-          ⬇ PDF
+          🖨 พิมพ์
         </button>
       </div>
 
