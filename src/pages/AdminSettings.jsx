@@ -31,6 +31,7 @@ export default function AdminSettings() {
   const [saving, setSaving] = useState(false)
   const [logoPreview, setLogoPreview] = useState(null)
   const [logoUploading, setLogoUploading] = useState(false)
+  const [logoUrlInput, setLogoUrlInput] = useState('')
   const [lineToken, setLineToken] = useState('')
   const [savingLine, setSavingLine] = useState(false)
   const [newUser, setNewUser] = useState({ email: '', name: '', role: 'teacher', lineUserId: '' })
@@ -68,30 +69,31 @@ export default function AdminSettings() {
       if (usersRes.success) setUsers(usersRes.users || [])
       if (settingsRes.success) {
         setLogoPreview(settingsRes.logoUrl || null)
+        setLogoUrlInput(settingsRes.logoUrl || '')
         setLineToken(settingsRes.lineToken || '')
       }
     } catch (e) { console.error(e) }
     setLoading(false)
   }
 
-  const handleLogoChange = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-    if (!file.type.startsWith('image/')) { showToast('กรุณาเลือกไฟล์รูปภาพ', 'error'); return }
-    if (file.size > 2 * 1024 * 1024) { showToast('ไฟล์ต้องไม่เกิน 2MB', 'error'); return }
+  const handleSaveLogo = async () => {
+    if (!logoUrlInput.trim()) { showToast('กรุณากรอก URL โลโก้', 'error'); return }
     setLogoUploading(true)
-    const reader = new FileReader()
-    reader.onload = async (ev) => {
-      const base64 = ev.target.result
-      setLogoPreview(base64)
-      try {
-        const res = await apiFetch('uploadLogo', { base64, fileName: file.name, mimeType: file.type })
-        if (res.success) showToast('อัปโหลดโลโก้สำเร็จ')
-        else showToast('อัปโหลดไม่สำเร็จ: ' + res.error, 'error')
-      } catch { showToast('เกิดข้อผิดพลาด', 'error') }
-      setLogoUploading(false)
-    }
-    reader.readAsDataURL(file)
+    try {
+      const res = await apiFetch('saveSettings', { logoUrl: logoUrlInput.trim() })
+      if (res.success) { setLogoPreview(logoUrlInput.trim()); showToast('บันทึก URL โลโก้สำเร็จ') }
+      else showToast('บันทึกไม่สำเร็จ: ' + res.error, 'error')
+    } catch { showToast('เกิดข้อผิดพลาด', 'error') }
+    setLogoUploading(false)
+  }
+
+  const handleRemoveLogo = async () => {
+    setLogoUploading(true)
+    try {
+      await apiFetch('saveSettings', { logoUrl: '' })
+      setLogoPreview(null); setLogoUrlInput(''); showToast('ลบโลโก้แล้ว')
+    } catch { showToast('เกิดข้อผิดพลาด', 'error') }
+    setLogoUploading(false)
   }
 
   const handleAddUser = async () => {
@@ -337,13 +339,15 @@ export default function AdminSettings() {
           <h2 style={{fontSize:'16px',fontWeight:'700',color:'#0f172a',margin:'0 0 6px'}}>โลโก้โรงเรียน</h2>
           <p style={{fontSize:'13px',color:'#94a3b8',margin:'0 0 28px'}}>แสดงใน Navbar และหน้า Login — แนะนำ 200×200px, ไม่เกิน 2MB</p>
           <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'20px'}}>
+            {/* Preview */}
             <div style={{
               width:'140px', height:'140px', borderRadius:'24px',
               border:'2px dashed #e2e8f0', background:'#f8fafc',
               display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden',
             }}>
               {logoPreview ? (
-                <img src={logoPreview} alt="logo" style={{width:'100%',height:'100%',objectFit:'contain',padding:'12px',boxSizing:'border-box'}}/>
+                <img src={logoPreview} alt="logo" style={{width:'100%',height:'100%',objectFit:'contain',padding:'12px',boxSizing:'border-box'}}
+                  onError={() => { showToast('โหลดรูปไม่ได้ กรุณาตรวจสอบ URL', 'error'); setLogoPreview(null) }} />
               ) : (
                 <div style={{textAlign:'center',color:'#94a3b8'}}>
                   <div style={{fontSize:'36px',marginBottom:'4px'}}>🏫</div>
@@ -351,20 +355,30 @@ export default function AdminSettings() {
                 </div>
               )}
             </div>
+
+            {/* URL Input */}
+            <div style={{width:'100%',maxWidth:'480px'}}>
+              <label style={{display:'block',fontSize:'12px',color:'#64748b',marginBottom:'5px',fontWeight:'600'}}>URL รูปโลโก้</label>
+              <input
+                value={logoUrlInput}
+                onChange={e => setLogoUrlInput(e.target.value)}
+                placeholder="https://example.com/logo.png"
+                style={{width:'100%',boxSizing:'border-box',border:'1px solid #e2e8f0',borderRadius:'10px',padding:'10px 12px',fontSize:'13px',outline:'none',...s}}
+              />
+              <p style={{fontSize:'12px',color:'#94a3b8',marginTop:'4px'}}>
+                แนะนำใช้ Google Drive: อัปโหลดรูป → คลิกขวา → Get link → เปลี่ยนเป็น Anyone with link → คัดลอก File ID → ใส่เป็น
+                <code style={{background:'#f1f5f9',padding:'1px 4px',borderRadius:'4px',fontSize:'11px'}}> https://drive.google.com/thumbnail?id=FILE_ID&sz=w200</code>
+              </p>
+            </div>
+
             <div style={{display:'flex',gap:'10px'}}>
-              <input ref={fileRef} type="file" accept="image/*" onChange={handleLogoChange} style={{display:'none'}}/>
-              <button onClick={() => fileRef.current?.click()} disabled={logoUploading} style={{
+              <button onClick={handleSaveLogo} disabled={logoUploading} style={{
                 background:'linear-gradient(135deg,#1d4ed8,#4f46e5)',color:'#fff',
-                border:'none', borderRadius:'10px', padding:'11px 20px',
+                border:'none', borderRadius:'10px', padding:'11px 24px',
                 fontSize:'14px', fontWeight:'600', cursor:'pointer',...s,
-              }}>{logoUploading ? 'กำลังอัปโหลด...' : '📁 เลือกไฟล์'}</button>
+              }}>{logoUploading ? 'กำลังบันทึก...' : '💾 บันทึก URL'}</button>
               {logoPreview && (
-                <button onClick={async () => {
-                  setLogoUploading(true)
-                  await apiFetch('uploadLogo', { base64: null, fileName: '', mimeType: '' })
-                  setLogoPreview(null); setLogoUploading(false)
-                  showToast('ลบโลโก้แล้ว')
-                }} disabled={logoUploading} style={{
+                <button onClick={handleRemoveLogo} disabled={logoUploading} style={{
                   border:'1px solid #fecaca',color:'#ef4444',background:'#fef2f2',
                   borderRadius:'10px',padding:'11px 20px',fontSize:'14px',cursor:'pointer',...s,
                 }}>ลบโลโก้</button>
