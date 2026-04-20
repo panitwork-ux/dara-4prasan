@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script>
+    var path = window.location.pathname.replace('/dara-4prasan', '') || '/'
+    var search = window.location.search
+    var hash = window.location.hash
+    var url = '/dara-4prasan/?p=' + encodeURIComponent(path + search) + hash
+    window.location.replace(url)
+  </script>
+</head>
+<body></body>
+</html>
