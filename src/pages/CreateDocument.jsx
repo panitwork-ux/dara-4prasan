@@ -5,6 +5,7 @@ import { useUser } from '../context/UserContext'
 import { createDocument, getUsers } from '../utils/api'
 import { ROLE_LABELS, ROLE_POSITION, DEPT_HEAD_ROLES } from '../utils/roles'
 import SignaturePad from '../components/SignaturePad'
+import { showToast, updateToast } from '../components/Toast'
 
 const ss = { fontFamily:"'Sarabun',sans-serif" }
 const inp = { width:'100%', border:'1px solid var(--border)', borderRadius:'10px',
@@ -67,6 +68,7 @@ export default function CreateDocument() {
 
   const handleSubmit = async () => {
     setSaving(true); setShowConfirm(false)
+    const tid = showToast('กำลังส่งเอกสาร...', 'loading')
     try {
       const res = await createDocument({
         ...form, teacherSig: sig,
@@ -75,9 +77,9 @@ export default function CreateDocument() {
         createdByPhoto: user.photoURL,
         creatorRole: profile?.role || 'teacher',
       })
-      if (res.success) nav(`/document/${res.docId}`)
-      else alert('เกิดข้อผิดพลาด: ' + res.error)
-    } catch { alert('เกิดข้อผิดพลาด') }
+      if (res.success) { updateToast(tid, 'ส่งเอกสารสำเร็จ ✓', 'success'); nav(`/document/${res.docId}`) }
+      else { updateToast(tid, 'เกิดข้อผิดพลาด: ' + res.error, 'error') }
+    } catch { updateToast(tid, 'เกิดข้อผิดพลาด กรุณาลองใหม่', 'error') }
     setSaving(false)
   }
 

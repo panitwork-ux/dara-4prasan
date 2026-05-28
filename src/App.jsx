@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { UserProvider } from './context/UserContext'
 import { ThemeProvider } from './context/ThemeContext'
 import Sidebar from './components/Sidebar'
+import ToastContainer from './components/Toast'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import CreateDocument from './pages/CreateDocument'
@@ -48,6 +49,7 @@ export default function App() {
       <AuthProvider>
         <UserProvider>
           <AppRoutes />
+          <ToastContainer />
         </UserProvider>
       </AuthProvider>
     </ThemeProvider>

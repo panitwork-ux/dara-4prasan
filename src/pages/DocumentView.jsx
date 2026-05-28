@@ -11,6 +11,7 @@ import { ROLE_LABELS, ROLE_POSITION, DEPT_HEAD_ROLES, DEPT_CHIEF_ROLES } from '.
 import StatusBadge from '../components/StatusBadge'
 import SignaturePad from '../components/SignaturePad'
 import { format } from 'date-fns'
+import { showToast, updateToast, hideToast } from '../components/Toast'
 import { th } from 'date-fns/locale'
 
 const ss = { fontFamily:"'Sarabun',sans-serif" }
@@ -84,18 +85,30 @@ export default function DocumentView() {
   // ── Actions ──
   const doSign = async (sig) => {
     setSaving(true); setShowSign(false)
-    const res = await signDocument({ docId:id, signature:sig, signerEmail:user.email,
-      signerName:profile?.name||user.displayName, signerRole:role })
-    if (res.success) loadAll()
-    else alert('Error: ' + res.error)
+    const tid = showToast('กำลังบันทึกลายเซ็น...', 'loading')
+    try {
+      const res = await signDocument({ docId:id, signature:sig, signerEmail:user.email,
+        signerName:profile?.name||user.displayName, signerRole:role })
+      if (res.success) {
+        updateToast(tid, 'เซ็นชื่อสำเร็จ ✓', 'success')
+        loadAll()
+      } else {
+        updateToast(tid, 'เกิดข้อผิดพลาด: ' + res.error, 'error')
+      }
+    } catch { updateToast(tid, 'เกิดข้อผิดพลาด กรุณาลองใหม่', 'error') }
     setSaving(false)
   }
 
   const doReturn = async () => {
     if (!returnReason.trim()) { alert('กรุณาระบุเหตุผล'); return }
     setSaving(true); setShowReturn(false)
-    await returnDocument({ docId:id, reason:returnReason, byEmail:user.email, byName:profile?.name||user.displayName })
-    setReturnReason(''); loadAll(); setSaving(false)
+    const tid = showToast('กำลังส่งคืนเอกสาร...', 'loading')
+    try {
+      await returnDocument({ docId:id, reason:returnReason, byEmail:user.email, byName:profile?.name||user.displayName })
+      updateToast(tid, 'ส่งคืนเอกสารแล้ว', 'success')
+      setReturnReason(''); loadAll()
+    } catch { updateToast(tid, 'เกิดข้อผิดพลาด', 'error') }
+    setSaving(false)
   }
 
   const doResubmit = async () => {
@@ -108,24 +121,39 @@ export default function DocumentView() {
   const doAssign = async () => {
     if (!assignData.dept) { alert('กรุณาเลือกฝ่าย'); return }
     setSaving(true); setShowAssign(false)
-    await assignChief({ docId:id, targetDept:assignData.dept, note:assignData.note, chiefNote:assignData.chiefNote,
-      byEmail:user.email, byName:profile?.name||user.displayName })
-    loadAll(); setSaving(false)
+    const tid = showToast('กำลังมอบหมายงาน...', 'loading')
+    try {
+      await assignChief({ docId:id, targetDept:assignData.dept, note:assignData.note, chiefNote:assignData.chiefNote,
+        byEmail:user.email, byName:profile?.name||user.displayName })
+      updateToast(tid, 'มอบหมายงานสำเร็จ ✓', 'success')
+      loadAll()
+    } catch { updateToast(tid, 'เกิดข้อผิดพลาด', 'error') }
+    setSaving(false)
   }
 
   const doCreateF3 = async () => {
     setSaving(true); setShowF3(false)
-    await createForm3({ docId:id, ...f3Data, createdByEmail:user.email,
-      createdByName:profile?.name||user.displayName, creatorRole:role,
-      assignedTeacherPosition:ROLE_POSITION[role]||'' })
-    loadAll(); setSaving(false)
+    const tid = showToast('กำลังสร้างเอกสาร 3...', 'loading')
+    try {
+      await createForm3({ docId:id, ...f3Data, createdByEmail:user.email,
+        createdByName:profile?.name||user.displayName, creatorRole:role,
+        assignedTeacherPosition:ROLE_POSITION[role]||'' })
+      updateToast(tid, 'สร้างเอกสาร 3 สำเร็จ ✓', 'success')
+      loadAll()
+    } catch { updateToast(tid, 'เกิดข้อผิดพลาด', 'error') }
+    setSaving(false)
   }
 
   const doMarkComplete = async () => {
     if (!confirm('ยืนยันว่าดำเนินการครบถ้วนแล้ว?')) return
     setSaving(true)
-    await updateForm3({ docId:id, markCompleted:true, byEmail:user.email, byName:profile?.name||user.displayName })
-    loadAll(); setSaving(false)
+    const tid = showToast('กำลังบันทึกผล...', 'loading')
+    try {
+      await updateForm3({ docId:id, markCompleted:true, byEmail:user.email, byName:profile?.name||user.displayName })
+      updateToast(tid, 'ดำเนินการเสร็จสิ้น เอกสารสมบูรณ์ ✓', 'success', 5000)
+      loadAll()
+    } catch { updateToast(tid, 'เกิดข้อผิดพลาด', 'error') }
+    setSaving(false)
   }
 
   const doDelete = async () => {
