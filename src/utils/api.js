@@ -16,6 +16,7 @@ export const signDocument     = (d) => apiFetch('signDocument', d)
 export const returnDocument   = (d) => apiFetch('returnDocument', d)
 export const resubmitDocument = (d) => apiFetch('resubmitDocument', d)
 export const assignChief      = (d) => apiFetch('assignChief', d)
+export const assignStaff      = (d) => apiFetch('assignStaff', d)   // ← ใหม่: หัวหน้างานมอบหมายให้ครู
 export const createForm3      = (d) => apiFetch('createForm3', d)
 export const updateForm3      = (d) => apiFetch('updateForm3', d)
 export const getForm3         = (docId) => apiFetch('getForm3', { docId })

@@ -13,6 +13,7 @@ const KPI = [
   { key:'wait_dept_head', label:'รอหัวหน้าแผนกเซ็น',    icon:'⏳', bg:'linear-gradient(135deg,#f59e0b,#f97316)' },
   { key:'wait_asst_dir',  label:'รอผู้ช่วย ผอ. เซ็น',   icon:'✍',  bg:'linear-gradient(135deg,#8b5cf6,#a855f7)' },
   { key:'wait_chief',     label:'รอหัวหน้างานมอบหมาย',  icon:'📋', bg:'linear-gradient(135deg,#06b6d4,#0ea5e9)' },
+  { key:'wait_staff',     label:'รอครูดำเนินการ',        icon:'👤', bg:'linear-gradient(135deg,#f97316,#ea580c)' },
   { key:'in_progress',    label:'กำลังดำเนินการ',        icon:'🔄', bg:'linear-gradient(135deg,#3b82f6,#2563eb)' },
   { key:'completed',      label:'สมบูรณ์',               icon:'✓',  bg:'linear-gradient(135deg,#22c55e,#16a34a)' },
   { key:'returned',       label:'ส่งคืนแก้ไข',           icon:'↩',  bg:'linear-gradient(135deg,#ef4444,#dc2626)' },
@@ -54,9 +55,18 @@ export default function Dashboard() {
     return fStatus && fSearch
   })
 
-  // pending banner
-  const pendingStatus = isDeptHead ? 'wait_dept_head' : isAsstDir ? 'wait_asst_dir' : isDeptChief ? 'wait_chief' : 'returned'
-  const pending = docs.filter(d => d.status === pendingStatus)
+  // pending banner — รวม wait_staff สำหรับ isDeptStaff
+  const pendingStatus = isDeptHead ? 'wait_dept_head'
+    : isAsstDir  ? 'wait_asst_dir'
+    : isDeptChief ? 'wait_chief'
+    : 'returned'
+  const pending = docs.filter(d => {
+    if (isDeptHead)  return d.status === 'wait_dept_head'
+    if (isAsstDir)   return d.status === 'wait_asst_dir'
+    if (isDeptChief) return d.status === 'wait_chief'
+    // ครูฝ่าย: ดูเอกสารที่ assigned ให้ตัวเอง
+    return d.status === 'wait_staff' && d.assignedStaffEmail === user?.email
+  })
 
   const greeting = isDeptHead ? 'เอกสารรอเซ็น & ติดตามผล'
     : isAsstDir ? 'ภาพรวมเอกสารทั้งหมด'
@@ -104,7 +114,7 @@ export default function Dashboard() {
       )}
 
       {/* KPI */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:'10px', marginBottom:'24px' }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(8,1fr)', gap:'10px', marginBottom:'24px' }}>
         {KPI.map(k => (
           <button key={k.key} onClick={() => setFilter(k.key)} style={{
             background: filter === k.key ? k.bg : 'var(--surface)',
@@ -175,7 +185,7 @@ export default function Dashboard() {
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   onClick={() => nav(`/document/${doc.docId}`)}>
                   <td style={{ padding:'14px 16px', fontWeight:'600', fontSize:'14px', color:'var(--text)', ...ss }}>{doc.studentName}</td>
-                  <td style={{ padding:'14px 16px', fontSize:'13px', color:'var(--text-muted)', ...ss }}>{doc.studentClass} · {doc.studentNo}</td>
+                  <td style={{ padding:'14px 16px', fontSize:'13px', color:'var(--text-muted)', ...ss }}>{doc.studentClass || doc.class} · {doc.studentNo || doc.no}</td>
                   <td style={{ padding:'14px 16px', fontSize:'13px', color:'var(--text-muted)', ...ss }}>{doc.createdByName}</td>
                   <td style={{ padding:'14px 16px', fontSize:'12px', color:'var(--text-muted)', whiteSpace:'nowrap', ...ss }}>
                     {fmtDate(doc.createdAt)}

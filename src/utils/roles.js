@@ -40,10 +40,19 @@ export const DEPT_HEAD_ROLES  = ['head_kindergarten','head_primary_low','head_pr
 export const DEPT_CHIEF_ROLES = ['chief_guidance','chief_discipline','chief_nurse','chief_religious']
 export const DEPT_STAFF_ROLES = ['guidance','discipline','nurse','religious']
 
+// แมปว่าหัวหน้างานฝ่ายไหน มอบหมายได้ให้ role ไหน
+export const CHIEF_TO_STAFF = {
+  chief_guidance:   ['guidance'],
+  chief_discipline: ['discipline'],
+  chief_nurse:      ['nurse'],
+  chief_religious:  ['religious'],
+}
+
 export const STATUS_LABELS = {
   wait_dept_head: 'รอหัวหน้าแผนกเซ็น',
   wait_asst_dir:  'รอผู้ช่วย ผอ. เซ็น',
   wait_chief:     'รอหัวหน้างานมอบหมาย',
+  wait_staff:     'รอครูดำเนินการ',
   in_progress:    'กำลังดำเนินการ',
   completed:      'สมบูรณ์',
   returned:       'ส่งคืนแก้ไข',
@@ -53,6 +62,7 @@ export const STATUS_COLOR = {
   wait_dept_head: { bg:'#fffbeb', text:'#92400e', dot:'#f59e0b' },
   wait_asst_dir:  { bg:'#f5f3ff', text:'#5b21b6', dot:'#8b5cf6' },
   wait_chief:     { bg:'#ecfeff', text:'#155e75', dot:'#06b6d4' },
+  wait_staff:     { bg:'#fff7ed', text:'#9a3412', dot:'#f97316' },
   in_progress:    { bg:'#eff6ff', text:'#1e40af', dot:'#3b82f6' },
   completed:      { bg:'#f0fdf4', text:'#166534', dot:'#22c55e' },
   returned:       { bg:'#fef2f2', text:'#991b1b', dot:'#ef4444' },

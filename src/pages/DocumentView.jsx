@@ -5,18 +5,19 @@ import { useUser } from '../context/UserContext'
 import {
   getDocument, getForm3, getAuditLog,
   signDocument, returnDocument, resubmitDocument,
-  assignChief, createForm3, updateForm3, deleteDocument
+  assignChief, assignStaff, createForm3, updateForm3, deleteDocument,
+  getUsers,
 } from '../utils/api'
-import { ROLE_LABELS, ROLE_POSITION, DEPT_HEAD_ROLES, DEPT_CHIEF_ROLES } from '../utils/roles'
+import { ROLE_LABELS, ROLE_POSITION, DEPT_HEAD_ROLES, DEPT_CHIEF_ROLES, CHIEF_TO_STAFF } from '../utils/roles'
 import StatusBadge from '../components/StatusBadge'
 import SignaturePad from '../components/SignaturePad'
 import { format } from 'date-fns'
-import { showToast, updateToast, hideToast } from '../components/Toast'
+import { showToast, updateToast } from '../components/Toast'
 import { th } from 'date-fns/locale'
 
-const ss = { fontFamily:"'Sarabun',sans-serif" }
+const ss  = { fontFamily:"'Sarabun',sans-serif" }
 const card = { background:'var(--surface)', borderRadius:'18px', border:'1px solid var(--border)', padding:'22px', marginBottom:'14px' }
-const fmtD = (d) => { try { return d ? format(new Date(d),'d MMMM yyyy',{locale:th}) : '-' } catch { return '-' } }
+const fmtD  = (d) => { try { return d ? format(new Date(d),'d MMMM yyyy',{locale:th}) : '-' } catch { return '-' } }
 const fmtDs = (d) => { try { return d ? format(new Date(d),'d/M/yyyy',{locale:th}) : '..../..../..........' } catch { return '-' } }
 
 const infoRow = (label, value) => value ? (
@@ -32,34 +33,40 @@ export default function DocumentView() {
   const { profile, role, isAdmin, isAsstDir, isDeptHead, isDeptChief } = useUser()
   const nav = useNavigate()
 
-  const [doc, setDoc] = useState(null)
-  const [form3, setForm3] = useState(null)
-  const [logs, setLogs] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [tab, setTab] = useState('doc')
+  const [doc, setDoc]       = useState(null)
+  const [form3, setForm3]   = useState(null)
+  const [logs, setLogs]     = useState([])
+  const [users, setUsers]   = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [saving, setSaving]     = useState(false)
+  const [tab, setTab]           = useState('doc')
   const [testMode, setTestMode] = useState(false)
 
   // Modals
-  const [showSign, setShowSign] = useState(false)
-  const [showReturn, setShowReturn] = useState(false)
+  const [showSign, setShowSign]       = useState(false)
+  const [showReturn, setShowReturn]   = useState(false)
   const [returnReason, setReturnReason] = useState('')
-  const [showEdit, setShowEdit] = useState(false)
-  const [editForm, setEditForm] = useState({})
-  const [showAssign, setShowAssign] = useState(false)
-  const [assignData, setAssignData] = useState({ dept:'', note:'', chiefNote:'' })
-  const [showF3, setShowF3] = useState(false)
-  const [f3Data, setF3Data] = useState({ note:'', records:[{session:1,date:'',issue:'',approach:''}] })
+  const [showEdit, setShowEdit]       = useState(false)
+  const [editForm, setEditForm]       = useState({})
+  const [showAssign, setShowAssign]   = useState(false)   // ผู้ช่วย ผอ. → หัวหน้างาน
+  const [assignData, setAssignData]   = useState({ dept:'', note:'', chiefNote:'' })
+  const [showAssignStaff, setShowAssignStaff] = useState(false) // หัวหน้างาน → ครู
+  const [assignStaffData, setAssignStaffData] = useState({ staffEmail:'', staffNote:'' })
+  const [showF3, setShowF3]           = useState(false)
+  const [f3Data, setF3Data]           = useState({ note:'', records:[{session:1,date:'',issue:'',approach:''}] })
 
   useEffect(() => { loadAll() }, [id])
 
   const loadAll = async () => {
     setLoading(true)
     try {
-      const [r1, r3, rl] = await Promise.all([getDocument(id), getForm3(id), getAuditLog(id)])
+      const [r1, r3, rl, ru] = await Promise.all([
+        getDocument(id), getForm3(id), getAuditLog(id), getUsers()
+      ])
       if (r1.success) setDoc(r1.document)
       if (r3.success) setForm3(r3.form3)
       if (rl.success) setLogs(rl.logs || [])
+      if (ru.success) setUsers(ru.users || [])
     } catch {}
     setLoading(false)
   }
@@ -67,34 +74,49 @@ export default function DocumentView() {
   if (loading) return <div style={{ padding:'60px', textAlign:'center', color:'var(--text-muted)', ...ss }}>⏳ กำลังโหลด...</div>
   if (!doc) return <div style={{ padding:'60px', textAlign:'center', color:'var(--text-muted)', ...ss }}>ไม่พบเอกสาร</div>
 
-  // ── Permissions ──
-  const canSign    = () => testMode ? ['wait_dept_head','wait_asst_dir'].includes(doc.status)
+  // ─── ครูที่อยู่ในฝ่ายเดียวกับ chief (สำหรับ assignStaff dropdown) ───
+  const allowedStaffRoles = CHIEF_TO_STAFF[role] || []
+  const staffOptions = users.filter(u => allowedStaffRoles.includes(u.role))
+
+  // ─── Permissions ───
+  const canSign = () => testMode
+    ? ['wait_dept_head','wait_asst_dir'].includes(doc.status)
     : doc.status==='wait_dept_head' ? (isDeptHead||isAdmin)
-    : doc.status==='wait_asst_dir' ? (isAsstDir||isAdmin) : false
+    : doc.status==='wait_asst_dir'  ? (isAsstDir||isAdmin) : false
 
-  const canReturn  = () => canSign()
+  const canReturn = () => canSign()
 
-  const canAssign  = () => testMode ? doc.status==='wait_asst_dir'
+  // ผู้ช่วย ผอ. มอบหมายให้หัวหน้างาน (ขั้นตอนเดิม)
+  const canAssign = () => testMode
+    ? doc.status==='wait_asst_dir'
     : (isAsstDir||isAdmin) && doc.status==='wait_asst_dir' && !!doc.asstDirSig
 
-  const canF3      = () => testMode ? doc.status==='wait_chief'
+  // หัวหน้างาน มอบหมายให้ครู (ขั้นตอนใหม่)
+  const canAssignStaff = () => testMode
+    ? doc.status==='wait_chief'
     : (isDeptChief||isAdmin) && doc.status==='wait_chief'
 
-  const canEdit    = () => doc.status==='returned' && (doc.createdByEmail===user.email||isAdmin)
+  // ครูที่ได้รับมอบหมาย สร้างเอกสาร 3
+  const canF3 = () => {
+    if (doc.status !== 'wait_staff') return false
+    if (testMode) return true
+    // admin ทำได้เสมอ
+    if (isAdmin) return true
+    // ครูที่ถูก assign เท่านั้น
+    return doc.assignedStaffEmail === user.email
+  }
 
-  // ── Actions ──
+  const canEdit = () => doc.status==='returned' && (doc.createdByEmail===user.email||isAdmin)
+
+  // ─── Actions ───
   const doSign = async (sig) => {
     setSaving(true); setShowSign(false)
     const tid = showToast('กำลังบันทึกลายเซ็น...', 'loading')
     try {
       const res = await signDocument({ docId:id, signature:sig, signerEmail:user.email,
         signerName:profile?.name||user.displayName, signerRole:role })
-      if (res.success) {
-        updateToast(tid, 'เซ็นชื่อสำเร็จ ✓', 'success')
-        loadAll()
-      } else {
-        updateToast(tid, 'เกิดข้อผิดพลาด: ' + res.error, 'error')
-      }
+      if (res.success) { updateToast(tid, 'เซ็นชื่อสำเร็จ ✓', 'success'); loadAll() }
+      else updateToast(tid, 'เกิดข้อผิดพลาด: ' + res.error, 'error')
     } catch { updateToast(tid, 'เกิดข้อผิดพลาด กรุณาลองใหม่', 'error') }
     setSaving(false)
   }
@@ -118,19 +140,41 @@ export default function DocumentView() {
     setSaving(false)
   }
 
+  // ผู้ช่วย ผอ. → หัวหน้างาน
   const doAssign = async () => {
     if (!assignData.dept) { alert('กรุณาเลือกฝ่าย'); return }
     setSaving(true); setShowAssign(false)
     const tid = showToast('กำลังมอบหมายงาน...', 'loading')
     try {
-      await assignChief({ docId:id, targetDept:assignData.dept, note:assignData.note, chiefNote:assignData.chiefNote,
-        byEmail:user.email, byName:profile?.name||user.displayName })
-      updateToast(tid, 'มอบหมายงานสำเร็จ ✓', 'success')
-      loadAll()
+      await assignChief({ docId:id, targetDept:assignData.dept, note:assignData.note,
+        chiefNote:assignData.chiefNote, byEmail:user.email, byName:profile?.name||user.displayName })
+      updateToast(tid, 'มอบหมายงานสำเร็จ ✓', 'success'); loadAll()
     } catch { updateToast(tid, 'เกิดข้อผิดพลาด', 'error') }
     setSaving(false)
   }
 
+  // หัวหน้างาน → ครู
+  const doAssignStaff = async () => {
+    if (!assignStaffData.staffEmail) { alert('กรุณาเลือกครูที่จะมอบหมาย'); return }
+    setSaving(true); setShowAssignStaff(false)
+    const tid = showToast('กำลังมอบหมายให้ครู...', 'loading')
+    try {
+      const staff = users.find(u => u.email === assignStaffData.staffEmail)
+      await assignStaff({
+        docId:id,
+        staffEmail: assignStaffData.staffEmail,
+        staffName:  staff?.name || '',
+        staffRole:  staff?.role || '',
+        staffNote:  assignStaffData.staffNote,
+        byEmail: user.email,
+        byName:  profile?.name||user.displayName,
+      })
+      updateToast(tid, 'มอบหมายให้ครูสำเร็จ ✓', 'success'); loadAll()
+    } catch { updateToast(tid, 'เกิดข้อผิดพลาด', 'error') }
+    setSaving(false)
+  }
+
+  // ครู สร้างเอกสาร 3
   const doCreateF3 = async () => {
     setSaving(true); setShowF3(false)
     const tid = showToast('กำลังสร้างเอกสาร 3...', 'loading')
@@ -138,8 +182,7 @@ export default function DocumentView() {
       await createForm3({ docId:id, ...f3Data, createdByEmail:user.email,
         createdByName:profile?.name||user.displayName, creatorRole:role,
         assignedTeacherPosition:ROLE_POSITION[role]||'' })
-      updateToast(tid, 'สร้างเอกสาร 3 สำเร็จ ✓', 'success')
-      loadAll()
+      updateToast(tid, 'สร้างเอกสาร 3 สำเร็จ ✓', 'success'); loadAll()
     } catch { updateToast(tid, 'เกิดข้อผิดพลาด', 'error') }
     setSaving(false)
   }
@@ -150,8 +193,7 @@ export default function DocumentView() {
     const tid = showToast('กำลังบันทึกผล...', 'loading')
     try {
       await updateForm3({ docId:id, markCompleted:true, byEmail:user.email, byName:profile?.name||user.displayName })
-      updateToast(tid, 'ดำเนินการเสร็จสิ้น เอกสารสมบูรณ์ ✓', 'success', 5000)
-      loadAll()
+      updateToast(tid, 'ดำเนินการเสร็จสิ้น เอกสารสมบูรณ์ ✓', 'success', 5000); loadAll()
     } catch { updateToast(tid, 'เกิดข้อผิดพลาด', 'error') }
     setSaving(false)
   }
@@ -183,12 +225,16 @@ export default function DocumentView() {
   ]
 
   const safeStr = (v) => (!v || Array.isArray(v) || (typeof v==='string' && v.startsWith('['))) ? '' : String(v)
+
+  // ─── Timeline (7 ขั้นตอน) ───
   const STEPS = [
-    {label:'สร้างเอกสาร', done:true, name:safeStr(doc.createdByName), date:doc.createdAt},
-    {label:'หัวหน้าแผนกเซ็น', done:!!doc.deptHeadSig, name:safeStr(doc.deptHeadName), date:doc.deptHeadSignedAt},
-    {label:'ผู้ช่วย ผอ. เซ็น', done:!!doc.asstDirSig, name:safeStr(doc.asstDirName), date:doc.asstDirSignedAt},
-    {label:'มอบหมายฝ่าย', done:!!doc.targetDept, name:safeStr(ROLE_LABELS[doc.targetDept]||doc.targetDept), date:null},
-    {label:'ดำเนินการ/สมบูรณ์', done:doc.status==='completed', name:null, date:null},
+    { label:'สร้างเอกสาร',       done:true,                    name:safeStr(doc.createdByName),    date:doc.createdAt },
+    { label:'หัวหน้าแผนกเซ็น',   done:!!doc.deptHeadSig,       name:safeStr(doc.deptHeadName),     date:doc.deptHeadSignedAt },
+    { label:'ผู้ช่วย ผอ. เซ็น',  done:!!doc.asstDirSig,        name:safeStr(doc.asstDirName),      date:doc.asstDirSignedAt },
+    { label:'มอบหมายฝ่าย',       done:!!doc.targetDept,        name:safeStr(ROLE_LABELS[doc.targetDept]||doc.targetDept), date:null },
+    { label:'มอบหมายให้ครู',     done:!!doc.assignedStaffEmail, name:safeStr(doc.assignedStaffName), date:doc.assignedAt },
+    { label:'ดำเนินการ',         done:doc.status==='in_progress'||doc.status==='completed', name:null, date:null },
+    { label:'สมบูรณ์',           done:doc.status==='completed', name:null, date:null },
   ]
 
   return (
@@ -247,6 +293,18 @@ export default function DocumentView() {
           <strong>↩ เหตุผลการส่งคืน:</strong> {doc.returnReason}
         </div>
       )}
+      {/* Banner แจ้งครูที่ถูกมอบหมาย */}
+      {doc.status === 'wait_staff' && doc.assignedStaffEmail === user.email && (
+        <div style={{ background:'#fff7ed', border:'1px solid #fed7aa', borderRadius:'12px',
+          padding:'12px 16px', marginBottom:'14px', display:'flex', alignItems:'center', gap:'10px',
+          fontSize:'13px', color:'#9a3412', ...ss }}>
+          <span style={{ fontSize:'20px' }}>📋</span>
+          <div>
+            <strong>คุณได้รับมอบหมายให้ดูแลนักเรียนรายนี้</strong>
+            {doc.staffNote && <div style={{ marginTop:'4px', opacity:0.85 }}>หมายเหตุ: {doc.staffNote}</div>}
+          </div>
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div style={{ display:'flex', flexWrap:'wrap', gap:'8px', marginBottom:'18px' }}>
@@ -266,15 +324,23 @@ export default function DocumentView() {
             📋 มอบหมายให้หัวหน้างาน
           </button>
         )}
+        {canAssignStaff() && (
+          <button onClick={() => setShowAssignStaff(true)} disabled={saving} style={{
+            background:'linear-gradient(135deg,#0891b2,#0e7490)', color:'#fff',
+            border:'none', borderRadius:'10px', padding:'10px 20px',
+            fontSize:'14px', fontWeight:'600', cursor:'pointer', ...ss }}>
+            👤 มอบหมายให้ครู
+          </button>
+        )}
         {canF3() && (
           <button onClick={() => setShowF3(true)} disabled={saving} style={{
-            background:'linear-gradient(135deg,#0891b2,#0e7490)', color:'#fff',
+            background:'linear-gradient(135deg,#16a34a,#15803d)', color:'#fff',
             border:'none', borderRadius:'10px', padding:'10px 20px',
             fontSize:'14px', fontWeight:'600', cursor:'pointer', ...ss }}>
             📄 สร้างเอกสาร 3
           </button>
         )}
-        {doc.status === 'in_progress' && (isDeptChief||isAdmin||testMode) && (
+        {doc.status === 'in_progress' && (doc.assignedStaffEmail===user.email||isAdmin||testMode) && (
           <button onClick={doMarkComplete} disabled={saving} style={{
             background:'linear-gradient(135deg,#22c55e,#16a34a)', color:'#fff',
             border:'none', borderRadius:'10px', padding:'10px 20px',
@@ -299,7 +365,8 @@ export default function DocumentView() {
             ✏️ แก้ไขและส่งใหม่
           </button>
         )}
-        {!canSign()&&!canReturn()&&!canAssign()&&!canF3()&&!canEdit()&&doc.status!=='completed'&&doc.status!=='in_progress'&&!testMode && (
+        {!canSign()&&!canReturn()&&!canAssign()&&!canAssignStaff()&&!canF3()&&!canEdit()
+          &&doc.status!=='completed'&&doc.status!=='in_progress'&&!testMode && (
           <div style={{ fontSize:'13px', color:'var(--text-muted)', padding:'10px 0', ...ss }}>
             💡 กด <strong>🧪 Test</strong> เพื่อทดสอบ Workflow
           </div>
@@ -307,11 +374,11 @@ export default function DocumentView() {
       </div>
 
       {/* Timeline */}
-      <div style={{ ...card, marginBottom:'18px' }}>
+      <div style={{ ...card, marginBottom:'18px', overflowX:'auto' }}>
         <div style={{ fontWeight:'700', fontSize:'14px', color:'var(--text)', marginBottom:'16px', ...ss }}>เส้นทางเอกสาร</div>
-        <div style={{ display:'flex', gap:'0', flexWrap:'wrap' }}>
+        <div style={{ display:'flex', minWidth:'600px' }}>
           {STEPS.map((s, i) => (
-            <div key={i} style={{ display:'flex', alignItems:'center', flex:1, minWidth:'120px' }}>
+            <div key={i} style={{ display:'flex', alignItems:'center', flex:1 }}>
               <div style={{ textAlign:'center', flex:1 }}>
                 <div style={{ width:'32px', height:'32px', borderRadius:'50%', margin:'0 auto 6px',
                   display:'flex', alignItems:'center', justifyContent:'center', fontSize:'14px',
@@ -322,10 +389,12 @@ export default function DocumentView() {
                 <div style={{ fontSize:'10px', fontWeight:'600', lineHeight:'1.3',
                   color: s.done ? 'var(--text)' : 'var(--text-muted)', ...ss }}>{s.label}</div>
                 {s.done && s.name && (
-                  <div style={{ fontSize:'10px', color:'var(--text-muted)', marginTop:'2px', ...ss }}>{s.name}</div>
+                  <div style={{ fontSize:'9px', color:'var(--text-muted)', marginTop:'2px', ...ss }}>{s.name}</div>
                 )}
               </div>
-              {i < 4 && <div style={{ width:'20px', height:'2px', background: s.done ? '#22c55e' : 'var(--border)', flexShrink:0 }}/>}
+              {i < STEPS.length - 1 && (
+                <div style={{ width:'16px', height:'2px', background: s.done ? '#22c55e' : 'var(--border)', flexShrink:0 }}/>
+              )}
             </div>
           ))}
         </div>
@@ -405,6 +474,26 @@ export default function DocumentView() {
               </div>
             )
           })}
+          {/* แสดงบันทึก/คำสั่งของ ผู้ช่วย ผอ. */}
+          {doc.chiefNote && (
+            <div style={{ marginTop:'14px', background:'#eff6ff', border:'1px solid #bfdbfe',
+              borderRadius:'10px', padding:'12px', fontSize:'13px', ...ss }}>
+              <span style={{ fontWeight:'600', color:'#1d4ed8' }}>บันทึกผู้ช่วย ผอ.: </span>
+              <span style={{ color:'var(--text)' }}>{doc.chiefNote}</span>
+            </div>
+          )}
+          {/* แสดงว่ามอบหมายให้ใคร */}
+          {doc.assignedStaffName && (
+            <div style={{ marginTop:'10px', background:'#fff7ed', border:'1px solid #fed7aa',
+              borderRadius:'10px', padding:'12px', fontSize:'13px', display:'flex', gap:'8px', ...ss }}>
+              <span style={{ fontSize:'16px' }}>👤</span>
+              <div>
+                <span style={{ fontWeight:'600', color:'#9a3412' }}>มอบหมายให้: </span>
+                <span style={{ color:'var(--text)' }}>{doc.assignedStaffName} ({ROLE_LABELS[doc.assignedStaffRole]||doc.assignedStaffRole})</span>
+                {doc.staffNote && <div style={{ marginTop:'3px', color:'var(--text-muted)', fontSize:'12px' }}>{doc.staffNote}</div>}
+              </div>
+            </div>
+          )}
         </div>
       </>}
 
@@ -415,7 +504,11 @@ export default function DocumentView() {
           {!form3 ? (
             <div style={{ textAlign:'center', padding:'32px', color:'var(--text-muted)', ...ss }}>
               <div style={{ fontSize:'32px', marginBottom:'10px' }}>📋</div>
-              <div>ยังไม่มีเอกสาร 3 {doc.status==='wait_chief' ? '— รอหัวหน้างานสร้าง' : ''}</div>
+              <div>
+                {doc.status==='wait_chief' && 'รอหัวหน้างานมอบหมายให้ครู'}
+                {doc.status==='wait_staff' && `รอ ${doc.assignedStaffName||'ครู'} สร้างเอกสาร 3`}
+                {!['wait_chief','wait_staff'].includes(doc.status) && 'ยังไม่มีเอกสาร 3'}
+              </div>
             </div>
           ) : (
             <>
@@ -506,6 +599,7 @@ export default function DocumentView() {
       {/* ─── Modals ─── */}
       {showSign && <SignaturePad onSave={doSign} onCancel={() => setShowSign(false)}/>}
 
+      {/* Modal: ส่งคืน */}
       {showReturn && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
           <div style={{ background:'var(--surface)', borderRadius:'20px', padding:'28px', width:'100%', maxWidth:'440px', ...ss }}>
@@ -525,6 +619,7 @@ export default function DocumentView() {
         </div>
       )}
 
+      {/* Modal: ผู้ช่วย ผอ. มอบหมายให้หัวหน้างาน */}
       {showAssign && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
           <div style={{ background:'var(--surface)', borderRadius:'20px', padding:'28px', width:'100%', maxWidth:'460px', ...ss }}>
@@ -540,18 +635,16 @@ export default function DocumentView() {
             </div>
             <div style={{ marginBottom:'14px' }}>
               <label style={{ display:'block', fontSize:'12px', color:'var(--text-muted)', marginBottom:'5px', fontWeight:'600', ...ss }}>
-                บันทึก / สรุปผลการประชุม (ข้อความในกล่องซ้ายบนเอกสาร 2)
+                บันทึก / สรุปผลการประชุม (แสดงในเอกสาร 2)
               </label>
               <textarea value={assignData.chiefNote} onChange={e => setAssignData(a => ({ ...a, chiefNote:e.target.value }))} rows={4}
-                placeholder="ระบุแนวทางการดำเนินการให้หัวหน้างานฝ่าย เช่น ให้ดำเนินการตามขั้นตอน..."
+                placeholder="ระบุแนวทางการดำเนินการ..."
                 style={{ width:'100%', boxSizing:'border-box', border:'1px solid #bfdbfe', borderRadius:'10px',
                   padding:'10px 12px', fontSize:'13px', outline:'none', background:'#eff6ff', color:'var(--text)', resize:'none', ...ss }}/>
-              <div style={{ fontSize:'11px', color:'#1d4ed8', marginTop:'4px', ...ss }}>ข้อความนี้จะแสดงในกล่องของผู้ช่วย ผอ. ในเอกสาร 2</div>
             </div>
             <div style={{ marginBottom:'16px' }}>
               <label style={{ display:'block', fontSize:'12px', color:'var(--text-muted)', marginBottom:'5px', fontWeight:'600', ...ss }}>บันทึกเพิ่มเติม (ภายใน)</label>
               <textarea value={assignData.note} onChange={e => setAssignData(a => ({ ...a, note:e.target.value }))} rows={2}
-                placeholder="หมายเหตุเพิ่มเติมสำหรับบันทึก..."
                 style={{ width:'100%', boxSizing:'border-box', border:'1px solid var(--border)', borderRadius:'10px',
                   padding:'10px 12px', fontSize:'13px', outline:'none', background:'var(--bg)', color:'var(--text)', resize:'none', ...ss }}/>
             </div>
@@ -565,11 +658,62 @@ export default function DocumentView() {
         </div>
       )}
 
+      {/* Modal: หัวหน้างาน มอบหมายให้ครู */}
+      {showAssignStaff && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
+          <div style={{ background:'var(--surface)', borderRadius:'20px', padding:'28px', width:'100%', maxWidth:'460px', ...ss }}>
+            <h2 style={{ fontSize:'18px', fontWeight:'700', color:'var(--text)', margin:'0 0 6px', ...ss }}>👤 มอบหมายให้ครู</h2>
+            <p style={{ fontSize:'13px', color:'var(--text-muted)', margin:'0 0 18px', ...ss }}>
+              เลือกครูในฝ่ายของคุณเพื่อให้สร้างเอกสาร 3 และดูแลนักเรียนรายนี้
+            </p>
+            <div style={{ marginBottom:'14px' }}>
+              <label style={{ display:'block', fontSize:'12px', color:'var(--text-muted)', marginBottom:'5px', fontWeight:'600', ...ss }}>ครูที่จะมอบหมาย <span style={{ color:'#ef4444' }}>*</span></label>
+              {staffOptions.length === 0 ? (
+                <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:'10px', padding:'12px',
+                  fontSize:'13px', color:'#991b1b', ...ss }}>
+                  ⚠️ ไม่พบครูในฝ่ายนี้ในระบบ กรุณาให้ Admin เพิ่มผู้ใช้ก่อน
+                </div>
+              ) : (
+                <select value={assignStaffData.staffEmail}
+                  onChange={e => setAssignStaffData(a => ({ ...a, staffEmail:e.target.value }))}
+                  style={{ width:'100%', border:'1px solid var(--border)', borderRadius:'10px', padding:'10px 12px',
+                    fontSize:'13px', outline:'none', background:'var(--bg)', color:'var(--text)', ...ss }}>
+                  <option value="">— เลือกครู —</option>
+                  {staffOptions.map(u => (
+                    <option key={u.email} value={u.email}>
+                      {u.name} ({ROLE_LABELS[u.role]||u.role})
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+            <div style={{ marginBottom:'16px' }}>
+              <label style={{ display:'block', fontSize:'12px', color:'var(--text-muted)', marginBottom:'5px', fontWeight:'600', ...ss }}>คำแนะนำ / หมายเหตุสำหรับครู</label>
+              <textarea value={assignStaffData.staffNote}
+                onChange={e => setAssignStaffData(a => ({ ...a, staffNote:e.target.value }))} rows={3}
+                placeholder="เช่น ให้ติดตามนักเรียนทุกสัปดาห์..."
+                style={{ width:'100%', boxSizing:'border-box', border:'1px solid var(--border)', borderRadius:'10px',
+                  padding:'10px 12px', fontSize:'13px', outline:'none', background:'var(--bg)', color:'var(--text)', resize:'none', ...ss }}/>
+            </div>
+            <div style={{ display:'flex', justifyContent:'space-between', gap:'10px' }}>
+              <button onClick={() => setShowAssignStaff(false)} style={{ border:'1px solid var(--border)', color:'var(--text-muted)',
+                background:'var(--bg)', borderRadius:'10px', padding:'10px 20px', fontSize:'14px', cursor:'pointer', ...ss }}>ยกเลิก</button>
+              <button onClick={doAssignStaff} disabled={saving || staffOptions.length === 0}
+                style={{ background: staffOptions.length > 0 ? 'linear-gradient(135deg,#0891b2,#0e7490)' : '#e2e8f0',
+                  color: staffOptions.length > 0 ? '#fff' : '#94a3b8',
+                  border:'none', borderRadius:'10px', padding:'10px 24px', fontSize:'14px', fontWeight:'600',
+                  cursor: staffOptions.length > 0 ? 'pointer' : 'not-allowed', ...ss }}>✓ มอบหมาย</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: สร้างเอกสาร 3 */}
       {showF3 && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
           <div style={{ background:'var(--surface)', borderRadius:'20px', padding:'28px', width:'100%', maxWidth:'560px', maxHeight:'80vh', overflowY:'auto', ...ss }}>
             <h2 style={{ fontSize:'18px', fontWeight:'700', color:'var(--text)', margin:'0 0 16px', ...ss }}>📄 สร้างเอกสาร 3</h2>
-            <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:'10px', padding:'10px 14px', marginBottom:'16px', fontSize:'13px', color:'#1e40af', ...ss }}>
+            <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:'10px', padding:'10px 14px', marginBottom:'16px', fontSize:'13px', color:'#166534', ...ss }}>
               สร้างโดย: {profile?.name} · {ROLE_LABELS[role]}
             </div>
             <div style={{ marginBottom:'14px' }}>
@@ -581,7 +725,7 @@ export default function DocumentView() {
             <div style={{ fontWeight:'600', fontSize:'13px', color:'var(--text)', marginBottom:'10px', ...ss }}>ตารางบันทึกการติดตาม</div>
             <div style={{ overflowX:'auto', marginBottom:'10px' }}>
               <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'12px' }}>
-                <thead><tr style={{ background:'#eff6ff' }}>
+                <thead><tr style={{ background:'#f0fdf4' }}>
                   {['ครั้งที่','วัน/เดือน/ปี','เรื่องที่พบ','แนวทาง'].map(h => (
                     <th key={h} style={{ border:'1px solid var(--border)', padding:'6px 10px', textAlign:'left', ...ss }}>{h}</th>
                   ))}
@@ -606,17 +750,18 @@ export default function DocumentView() {
               </table>
             </div>
             <button onClick={() => setF3Data(f => ({ ...f, records:[...f.records,{session:f.records.length+1,date:'',issue:'',approach:''}]}))}
-              style={{ background:'none', border:'none', color:'#1d4ed8', fontSize:'13px', cursor:'pointer', marginBottom:'14px', ...ss }}>+ เพิ่มแถว</button>
+              style={{ background:'none', border:'none', color:'#16a34a', fontSize:'13px', cursor:'pointer', marginBottom:'14px', ...ss }}>+ เพิ่มแถว</button>
             <div style={{ display:'flex', justifyContent:'space-between', gap:'10px' }}>
               <button onClick={() => setShowF3(false)} style={{ border:'1px solid var(--border)', color:'var(--text-muted)',
                 background:'var(--bg)', borderRadius:'10px', padding:'10px 20px', fontSize:'14px', cursor:'pointer', ...ss }}>ยกเลิก</button>
-              <button onClick={doCreateF3} disabled={saving} style={{ background:'linear-gradient(135deg,#0891b2,#0e7490)', color:'#fff',
+              <button onClick={doCreateF3} disabled={saving} style={{ background:'linear-gradient(135deg,#16a34a,#15803d)', color:'#fff',
                 border:'none', borderRadius:'10px', padding:'10px 24px', fontSize:'14px', fontWeight:'600', cursor:'pointer', ...ss }}>✓ บันทึกเอกสาร 3</button>
             </div>
           </div>
         </div>
       )}
 
+      {/* Modal: แก้ไขและส่งใหม่ */}
       {showEdit && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
           <div style={{ background:'var(--surface)', borderRadius:'20px', padding:'28px', width:'100%', maxWidth:'500px', ...ss }}>
@@ -634,12 +779,6 @@ export default function DocumentView() {
                       padding:'10px 12px', fontSize:'13px', outline:'none', background:'var(--bg)', color:'var(--text)', ...ss }}/>
                 </div>
               ))}
-              <div>
-                <label style={{ display:'block', fontSize:'12px', color:'var(--text-muted)', marginBottom:'4px', fontWeight:'600', ...ss }}>ปัญหาที่พบ (ข้อ 1)</label>
-                <input value={editForm.problems?.[0]||''} onChange={e => { const p=[...(editForm.problems||['','',''])]; p[0]=e.target.value; setEditForm(f=>({...f,problems:p})) }}
-                  style={{ width:'100%', boxSizing:'border-box', border:'1px solid var(--border)', borderRadius:'10px',
-                    padding:'10px 12px', fontSize:'13px', outline:'none', background:'var(--bg)', color:'var(--text)', ...ss }}/>
-              </div>
               <div>
                 <label style={{ display:'block', fontSize:'12px', color:'var(--text-muted)', marginBottom:'4px', fontWeight:'600', ...ss }}>บันทึกการแก้ไข</label>
                 <textarea value={editForm.note||''} onChange={e => setEditForm(f => ({ ...f, note:e.target.value }))} rows={3}
