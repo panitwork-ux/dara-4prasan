@@ -1,4 +1,4 @@
-import{R as $,f,t as v}from"./index-veJ1BPNF.js";const x=i=>{if(!i)return"...........................";try{return f(new Date(i),"d MMMM yyyy",{locale:v})}catch{return i}},u=i=>{if(!i)return"........../........../...........";try{return f(new Date(i),"d/M/yyyy",{locale:v})}catch{return i}};function D(i,p=null){var d,o,r;const l=i.records||[],g=i.problems||[],h=i.helpDone||[],m=i.remaining||[],c=i.suggestions||[],e=p?`<img src="${p}" style="width:72px;height:72px;object-fit:contain;display:block;margin:0 auto 8px;" />`:'<div style="width:72px;height:72px;background:#1d4ed8;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:800;margin:0 auto 8px;">ด</div>',y=l.length>0?l.map((s,t)=>`
+import{R as $,f,t as v}from"./index-BygXpMYO.js";const x=i=>{if(!i)return"...........................";try{return f(new Date(i),"d MMMM yyyy",{locale:v})}catch{return i}},u=i=>{if(!i)return"........../........../...........";try{return f(new Date(i),"d/M/yyyy",{locale:v})}catch{return i}};function D(i,p=null){var d,o,r;const l=i.records||[],g=i.problems||[],h=i.helpDone||[],m=i.remaining||[],c=i.suggestions||[],e=p?`<img src="${p}" style="width:72px;height:72px;object-fit:contain;display:block;margin:0 auto 8px;" />`:'<div style="width:72px;height:72px;background:#1d4ed8;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:800;margin:0 auto 8px;">ด</div>',y=l.length>0?l.map((s,t)=>`
         <tr>
           <td style="border:1px solid #333;padding:4px 6px;text-align:center;">${s.session||t+1}</td>
           <td style="border:1px solid #333;padding:4px 6px;white-space:nowrap;">${s.date||""}</td>
@@ -138,14 +138,17 @@ import{R as $,f,t as v}from"./index-veJ1BPNF.js";const x=i=>{if(!i)return"......
       <div style="margin-bottom:8px;font-size:12px;">
         เรียน <strong>${i.targetDeptName||"หัวหน้างานฝ่ายต่างๆ"}</strong>
       </div>
-      ${i.asstDirNote?`<div style="font-size:12px;background:#f8f9fa;border:1px solid #e9ecef;border-radius:4px;padding:8px;margin-bottom:8px;min-height:48px;line-height:1.6;">${i.asstDirNote}</div>`:'<div style="min-height:48px;border:1px dashed #ccc;border-radius:4px;margin-bottom:8px;"></div>'}
+      ${i.asstDirNote?'<div style="font-size:12px;background:#f8f9fa;border:1px solid #e9ecef;border-radius:4px;padding:8px;margin-bottom:8px;min-height:48px;line-height:1.6;">'+i.asstDirNote+"</div>":'<div style="min-height:48px;border:1px dashed #ccc;border-radius:4px;margin-bottom:8px;"></div>'}
       <div style="height:56px;border:1px dashed #ccc;border-radius:4px;background:#fafafa;margin:8px 0;
            display:flex;align-items:center;justify-content:center;">
         ${i.asstDirSig?`<img src="${i.asstDirSig}" style="max-height:52px;max-width:180px;" />`:""}
       </div>
-      <div style="text-align:center;line-height:1.7;font-size:12px;">
-        <div>ลงชื่อ (${i.asstDirName||"................................"})</div>
-        <div style="font-weight:600;">${i.asstDirName||"ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน"}</div>
+      <div style="font-size:12px;line-height:1.9;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <span>ลงชื่อ</span>
+          <span>ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน</span>
+        </div>
+        <div style="text-align:center;">(${i.asstDirName||"........................................"})</div>
         <div>ตำแหน่ง ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน</div>
       </div>
     </div>
