@@ -389,7 +389,7 @@ export default function DocumentView() {
                 <div style={{ fontSize:'11px', fontWeight:'700', lineHeight:'1.3',
                   color: s.done ? 'var(--text)' : '#475569', ...ss }}>{s.label}</div>
                 {s.done && s.name && (
-                  <div style={{ fontSize:'10px', color:'var(--text-muted)', marginTop:'3px', ...ss }}>{s.name}</div>
+                  <div style={{ fontSize:'11px', fontWeight:'600', color:'var(--text-muted)', marginTop:'3px', ...ss }}>{s.name}</div>
                 )}
               </div>
               {i < STEPS.length - 1 && (
