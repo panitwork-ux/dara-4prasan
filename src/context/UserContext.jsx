@@ -1,51 +1,46 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useAuth } from './AuthContext'
-import { apiFetch } from '../utils/api'
+import { getUserProfile } from '../utils/api'
+import { DEPT_HEAD_ROLES, DEPT_CHIEF_ROLES, DEPT_STAFF_ROLES } from '../utils/roles'
 
-const UserContext = createContext()
+const Ctx = createContext()
 
 export function UserProvider({ children }) {
   const { user } = useAuth()
   const [profile, setProfile] = useState(null)
-  const [loadingProfile, setLoadingProfile] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (user) fetchProfile()
+    if (user) load()
     else setProfile(null)
   }, [user])
 
-  const fetchProfile = async () => {
-    setLoadingProfile(true)
+  const load = async () => {
+    setLoading(true)
     try {
-      const res = await apiFetch('getUserProfile', { email: user.email })
-      if (res.success && res.user) {
-        setProfile(res.user)
-      } else {
-        // ถ้าไม่เจอใน Sheet ให้ default เป็น teacher
-        setProfile({
-          email: user.email,
-          name: user.displayName,
-          role: 'teacher',
-          lineUserId: '',
-        })
-      }
-    } catch (e) {
-      setProfile({ email: user.email, name: user.displayName, role: 'teacher', lineUserId: '' })
+      const res = await getUserProfile(user.email)
+      setProfile(res.success && res.user
+        ? res.user
+        : { email: user.email, name: user.displayName, role: 'teacher' })
+    } catch {
+      setProfile({ email: user.email, name: user.displayName, role: 'teacher' })
     }
-    setLoadingProfile(false)
+    setLoading(false)
   }
 
-  const isAdmin = profile?.role === 'admin'
-  const isDeptHead = profile?.role === 'dept_head'
-  const isAsstDir = profile?.role === 'asst_director'
-  const isTeacher = profile?.role === 'teacher'
-  const isDept = ['guidance', 'discipline', 'academic'].includes(profile?.role)
-
+  const role = profile?.role || 'teacher'
   return (
-    <UserContext.Provider value={{ profile, loadingProfile, isAdmin, isDeptHead, isAsstDir, isTeacher, isDept, refetchProfile: fetchProfile }}>
+    <Ctx.Provider value={{
+      profile, loading, refetch: load, role,
+      isAdmin:     role === 'admin',
+      isAsstDir:   role === 'asst_director',
+      isDeptHead:  DEPT_HEAD_ROLES.includes(role),
+      isDeptChief: DEPT_CHIEF_ROLES.includes(role),
+      isDeptStaff: DEPT_STAFF_ROLES.includes(role),
+    }}>
       {children}
-    </UserContext.Provider>
+    </Ctx.Provider>
   )
 }
 
-export const useUser = () => useContext(UserContext)
+export const useUser = () => useContext(Ctx)

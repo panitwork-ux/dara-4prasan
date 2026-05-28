@@ -9,26 +9,22 @@ export async function apiFetch(action, payload = {}) {
   return res.json()
 }
 
-// เอกสาร 1: แบบบันทึกการดูแล
-export const createForm1 = (data) => apiFetch('createForm1', data)
-export const getForm1 = (docId) => apiFetch('getForm1', { docId })
-
-// เอกสาร 2: แบบส่งต่อภายใน
-export const createForm2 = (data) => apiFetch('createForm2', data)
-export const getForm2 = (docId) => apiFetch('getForm2', { docId })
-
-// เอกสาร 3: บันทึกการติดตาม
-export const createForm3 = (data) => apiFetch('createForm3', data)
-export const getForm3 = (docId) => apiFetch('getForm3', { docId })
-
-// การเซ็นชื่อ
-export const signDocument = (data) => apiFetch('signDocument', data)
-
-// การส่งคืน
-export const returnDocument = (data) => apiFetch('returnDocument', data)
-
-// ดึงเอกสารทั้งหมดของผู้ใช้
-export const getMyDocuments = (email, role) => apiFetch('getMyDocuments', { email, role })
-
-// ประวัติ audit log
-export const getAuditLog = (docId) => apiFetch('getAuditLog', { docId })
+export const createDocument   = (d) => apiFetch('createDocument', d)
+export const getDocument      = (docId) => apiFetch('getDocument', { docId })
+export const getMyDocuments   = (email) => apiFetch('getMyDocuments', { email })
+export const signDocument     = (d) => apiFetch('signDocument', d)
+export const returnDocument   = (d) => apiFetch('returnDocument', d)
+export const resubmitDocument = (d) => apiFetch('resubmitDocument', d)
+export const assignChief      = (d) => apiFetch('assignChief', d)
+export const createForm3      = (d) => apiFetch('createForm3', d)
+export const updateForm3      = (d) => apiFetch('updateForm3', d)
+export const getForm3         = (docId) => apiFetch('getForm3', { docId })
+export const getAuditLog      = (docId) => apiFetch('getAuditLog', { docId })
+export const deleteDocument   = (docId, byEmail, byName) => apiFetch('deleteDocument', { docId, byEmail, byName })
+export const getUsers         = () => apiFetch('getUsers', {})
+export const upsertUser       = (d) => apiFetch('upsertUser', d)
+export const deleteUser       = (email) => apiFetch('deleteUser', { email })
+export const getUserProfile   = (email) => apiFetch('getUserProfile', { email })
+export const getSettings      = () => apiFetch('getSettings', {})
+export const saveSettings     = (d) => apiFetch('saveSettings', d)
+export const resetAllSheets   = (byEmail, byName) => apiFetch('resetAllSheets', { byEmail, byName })

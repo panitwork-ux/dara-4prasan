@@ -5,7 +5,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --sidebar-width: 240px;
   --bg: #f0f4f8;
   --surface: #ffffff;
   --border: #e2e8f0;
@@ -26,14 +25,12 @@
 }
 
 * { box-sizing: border-box; }
-
 body {
-  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+  font-family: 'Sarabun', sans-serif;
   background-color: var(--bg);
   color: var(--text);
   transition: background-color 0.2s, color 0.2s;
 }
-
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
