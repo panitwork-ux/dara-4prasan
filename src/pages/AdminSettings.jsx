@@ -5,17 +5,27 @@ import { apiFetch } from '../utils/api'
 const ADMIN_PIN = '100625'
 
 const ROLE_OPTIONS = [
-  { value: 'teacher',           label: 'ครูที่ปรึกษา / ครูที่พบปัญหา',              color:'#64748b', bg:'#f8fafc' },
-  { value: 'head_kindergarten', label: 'หัวหน้าแผนกอนุบาล',                      color:'#854d0e', bg:'#fefce8' },
-  { value: 'head_primary_low',  label: 'หัวหน้าแผนกประถมศึกษาตอนต้น',             color:'#9a3412', bg:'#fff7ed' },
-  { value: 'head_primary_high', label: 'หัวหน้าแผนกประถมศึกษาตอนปลาย',            color:'#7c2d12', bg:'#fef3c7' },
-  { value: 'head_junior',       label: 'หัวหน้าแผนกมัธยมศึกษาตอนต้น',             color:'#1e40af', bg:'#dbeafe' },
-  { value: 'head_senior',       label: 'หัวหน้าแผนกมัธยมศึกษาตอนปลาย',            color:'#6b21a8', bg:'#fdf4ff' },
+  // ─── ครู ───
+  { value: 'teacher',           label: 'ครูที่ปรึกษา / ครูผู้สอน',                  color:'#64748b', bg:'#f8fafc' },
+  // ─── หัวหน้าแผนก ───
+  { value: 'head_kindergarten', label: 'หัวหน้าแผนกปฐมวัย',                        color:'#854d0e', bg:'#fefce8' },
+  { value: 'head_primary_low',  label: 'หัวหน้าแผนกประถมศึกษาตอนต้น',              color:'#9a3412', bg:'#fff7ed' },
+  { value: 'head_primary_high', label: 'หัวหน้าแผนกประถมศึกษาตอนปลาย',             color:'#7c2d12', bg:'#fef3c7' },
+  { value: 'head_junior',       label: 'หัวหน้าแผนกมัธยมศึกษาตอนต้น',              color:'#1e40af', bg:'#dbeafe' },
+  { value: 'head_senior',       label: 'หัวหน้าแผนกมัธยมศึกษาตอนปลาย',             color:'#6b21a8', bg:'#fdf4ff' },
+  // ─── ผู้บริหาร ───
   { value: 'asst_director',     label: 'ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน',      color:'#7e22ce', bg:'#fdf4ff' },
-  { value: 'guidance',      label: 'ฝ่ายแนะแนว',                   color:'#166534', bg:'#f0fdf4' },
-  { value: 'discipline',        label: 'ฝ่ายพัฒนาวินัย',                           color:'#1e40af', bg:'#eff6ff' },
-  { value: 'religious',         label: 'ฝ่ายศาสนกิจ',                              color:'#134e4a', bg:'#f0fdfa' },
-  { value: 'admin',         label: 'Admin',                        color:'#991b1b', bg:'#fef2f2' },
+  // ─── หัวหน้างานฝ่าย ───
+  { value: 'chief_guidance',    label: 'หัวหน้างานฝ่ายแนะแนว',                      color:'#166534', bg:'#dcfce7' },
+  { value: 'chief_discipline',  label: 'หัวหน้างานฝ่ายพัฒนาวินัย',                  color:'#1e40af', bg:'#dbeafe' },
+  { value: 'chief_nurse',       label: 'หัวหน้างานฝ่ายพยาบาล',                      color:'#be185d', bg:'#fdf2f8' },
+  { value: 'chief_religious',   label: 'หัวหน้างานฝ่ายศาสนกิจ',                     color:'#134e4a', bg:'#ccfbf1' },
+  // ─── ครูฝ่าย ───
+  { value: 'guidance',          label: 'ครูฝ่ายแนะแนว',                             color:'#166534', bg:'#f0fdf4' },
+  { value: 'discipline',        label: 'ครูฝ่ายพัฒนาวินัย',                         color:'#1e40af', bg:'#eff6ff' },
+  { value: 'nurse',             label: 'ครูพยาบาล',                                 color:'#be185d', bg:'#fdf2f8' },
+  { value: 'religious',         label: 'ครูฝ่ายศาสนกิจ',                            color:'#134e4a', bg:'#f0fdfa' },
+  { value: 'admin',             label: 'Admin',                                     color:'#991b1b', bg:'#fef2f2' },
 ]
 
 export default function AdminSettings() {
@@ -459,6 +469,10 @@ function roleDesc(role) {
     head_senior:       'เซ็นรับรองเอกสาร 2 ติดตามผล',
     asst_director:     'เซ็นเอกสาร 2 มอบหมายงานให้หัวหน้างาน ติดตามผล',
     chief_guidance:    'รับมอบหมายจาก ผอ. มอบหมายครูสร้างเอกสาร 3',
+    chief_discipline:  'รับมอบหมายจาก ผอ. มอบหมายครูสร้างเอกสาร 3',
+    chief_nurse:       'รับมอบหมายจาก ผอ. มอบหมายครูสร้างเอกสาร 3',
+    chief_religious:   'รับมอบหมายจาก ผอ. มอบหมายครูสร้างเอกสาร 3',
+    nurse:             'สร้างเอกสาร 3 ดูแลนักเรียน บันทึกผลติดตาม',
     chief_discipline:  'รับมอบหมายจาก ผอ. มอบหมายครูสร้างเอกสาร 3',
     chief_nurse:       'รับมอบหมายจาก ผอ. มอบหมายครูสร้างเอกสาร 3',
     chief_religious:   'รับมอบหมายจาก ผอ. มอบหมายครูสร้างเอกสาร 3',

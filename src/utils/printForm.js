@@ -194,14 +194,17 @@ export function buildPrintHTML(doc, logoUrl = null) {
       <div style="margin-bottom:8px;font-size:12px;">
         เรียน <strong>${doc.targetDeptName || 'หัวหน้างานฝ่ายต่างๆ'}</strong>
       </div>
-      ${doc.asstDirNote ? `<div style="font-size:12px;background:#f8f9fa;border:1px solid #e9ecef;border-radius:4px;padding:8px;margin-bottom:8px;min-height:48px;line-height:1.6;">${doc.asstDirNote}</div>` : '<div style="min-height:48px;border:1px dashed #ccc;border-radius:4px;margin-bottom:8px;"></div>'}
+      ${doc.asstDirNote ? '<div style="font-size:12px;background:#f8f9fa;border:1px solid #e9ecef;border-radius:4px;padding:8px;margin-bottom:8px;min-height:48px;line-height:1.6;">' + doc.asstDirNote + '</div>' : '<div style="min-height:48px;border:1px dashed #ccc;border-radius:4px;margin-bottom:8px;"></div>'}
       <div style="height:56px;border:1px dashed #ccc;border-radius:4px;background:#fafafa;margin:8px 0;
            display:flex;align-items:center;justify-content:center;">
         ${doc.asstDirSig ? `<img src="${doc.asstDirSig}" style="max-height:52px;max-width:180px;" />` : ''}
       </div>
-      <div style="text-align:center;line-height:1.7;font-size:12px;">
-        <div>ลงชื่อ (${doc.asstDirName || '................................'})</div>
-        <div style="font-weight:600;">${doc.asstDirName || 'ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน'}</div>
+      <div style="font-size:12px;line-height:1.9;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <span>ลงชื่อ</span>
+          <span>ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน</span>
+        </div>
+        <div style="text-align:center;">(${doc.asstDirName || '........................................'})</div>
         <div>ตำแหน่ง ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน</div>
       </div>
     </div>
