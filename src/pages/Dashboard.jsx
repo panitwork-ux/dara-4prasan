@@ -23,6 +23,8 @@ const fmtDate = (d) => {
   try { return d ? format(new Date(d), 'd MMM yy', { locale: th }) : '-' } catch { return '-' }
 }
 
+const ss = { fontFamily:"'Sarabun',sans-serif" }
+
 export default function Dashboard() {
   const { user } = useAuth()
   const { profile, role, isAsstDir, isDeptHead, isDeptChief } = useUser()
@@ -31,7 +33,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
-  const ss = { fontFamily:"'Sarabun',sans-serif" }
 
   useEffect(() => { if (user) load() }, [user])
 
@@ -55,116 +56,117 @@ export default function Dashboard() {
     return fStatus && fSearch
   })
 
-  // pending banner — รวม wait_staff สำหรับ isDeptStaff
-  const pendingStatus = isDeptHead ? 'wait_dept_head'
-    : isAsstDir  ? 'wait_asst_dir'
-    : isDeptChief ? 'wait_chief'
-    : 'returned'
+  // pending banner
   const pending = docs.filter(d => {
     if (isDeptHead)  return d.status === 'wait_dept_head'
     if (isAsstDir)   return d.status === 'wait_asst_dir'
     if (isDeptChief) return d.status === 'wait_chief'
-    // ครูฝ่าย: ดูเอกสารที่ assigned ให้ตัวเอง
     return d.status === 'wait_staff' && d.assignedStaffEmail === user?.email
   })
+  const pendingStatus = isDeptHead ? 'wait_dept_head'
+    : isAsstDir  ? 'wait_asst_dir'
+    : isDeptChief ? 'wait_chief'
+    : 'wait_staff'
 
-  const greeting = isDeptHead ? 'เอกสารรอเซ็น & ติดตามผล'
-    : isAsstDir ? 'ภาพรวมเอกสารทั้งหมด'
+  const greeting = isDeptHead  ? 'เอกสารรอเซ็น & ติดตามผล'
+    : isAsstDir   ? 'ภาพรวมเอกสารทั้งหมด'
     : isDeptChief ? 'เอกสารที่ได้รับมอบหมาย'
     : 'เอกสารของฉัน'
 
   return (
-    <div style={{ padding:'28px 32px', maxWidth:'1100px', ...ss }}>
+    <div style={{ padding:'32px 36px', maxWidth:'1200px', ...ss }}>
+
       {/* Header */}
-      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'24px', gap:'12px', flexWrap:'wrap' }}>
+      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between',
+        marginBottom:'28px', gap:'16px', flexWrap:'wrap' }}>
         <div>
-          <div style={{ fontSize:'11px', color:'var(--text-muted)', marginBottom:'4px' }}>หน้าหลัก</div>
-          <h1 style={{ fontSize:'24px', fontWeight:'700', color:'var(--text)', margin:'0 0 4px' }}>
+          <div style={{ fontSize:'12px', color:'var(--text-muted)', marginBottom:'5px', letterSpacing:'0.03em' }}>หน้าหลัก</div>
+          <h1 style={{ fontSize:'26px', fontWeight:'800', color:'var(--text)', margin:'0 0 5px', ...ss }}>
             สวัสดีครับ คุณ{(profile?.name||user?.displayName||'').split(' ')[0]} 👋
           </h1>
-          <p style={{ fontSize:'13px', color:'var(--text-muted)', margin:0 }}>{greeting}</p>
+          <p style={{ fontSize:'15px', color:'var(--text-muted)', margin:0, ...ss }}>{greeting}</p>
         </div>
         <button onClick={() => nav('/document/new')} style={{
           background:'linear-gradient(135deg,#1d4ed8,#4f46e5)', color:'#fff',
-          border:'none', borderRadius:'12px', padding:'12px 20px',
-          fontSize:'14px', fontWeight:'600', cursor:'pointer',
+          border:'none', borderRadius:'14px', padding:'13px 22px',
+          fontSize:'15px', fontWeight:'700', cursor:'pointer',
           display:'flex', alignItems:'center', gap:'8px',
           boxShadow:'0 4px 14px rgba(29,78,216,0.35)', ...ss,
         }}>
-          <span style={{ fontSize:'18px' }}>+</span> สร้างเอกสารใหม่
+          <span style={{ fontSize:'20px' }}>+</span> สร้างเอกสารใหม่
         </button>
       </div>
 
       {/* Pending banner */}
       {pending.length > 0 && (
-        <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'14px',
-          padding:'14px 18px', marginBottom:'20px', display:'flex', alignItems:'center', gap:'12px' }}>
-          <span style={{ fontSize:'22px' }}>🔔</span>
+        <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'16px',
+          padding:'16px 20px', marginBottom:'24px', display:'flex', alignItems:'center', gap:'14px' }}>
+          <span style={{ fontSize:'26px' }}>🔔</span>
           <div>
-            <div style={{ fontWeight:'700', fontSize:'14px', color:'#92400e' }}>
+            <div style={{ fontWeight:'700', fontSize:'16px', color:'#92400e', ...ss }}>
               มีเอกสารรอดำเนินการ {pending.length} รายการ
             </div>
-            <div style={{ fontSize:'12px', color:'#92400e', marginTop:'2px' }}>กรุณาดำเนินการโดยเร็ว</div>
+            <div style={{ fontSize:'13px', color:'#92400e', marginTop:'3px', ...ss }}>กรุณาดำเนินการโดยเร็ว</div>
           </div>
           <button onClick={() => setFilter(pendingStatus)} style={{
             marginLeft:'auto', background:'#f59e0b', color:'#fff',
-            border:'none', borderRadius:'8px', padding:'6px 14px', fontSize:'12px', fontWeight:'600', cursor:'pointer', ...ss,
+            border:'none', borderRadius:'10px', padding:'8px 18px', fontSize:'13px', fontWeight:'600', cursor:'pointer', ...ss,
           }}>ดูทั้งหมด →</button>
         </div>
       )}
 
-      {/* KPI */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(8,1fr)', gap:'10px', marginBottom:'24px' }}>
+      {/* KPI Cards */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(8,1fr)', gap:'10px', marginBottom:'28px' }}>
         {KPI.map(k => (
           <button key={k.key} onClick={() => setFilter(k.key)} style={{
             background: filter === k.key ? k.bg : 'var(--surface)',
             border: `1px solid ${filter === k.key ? 'transparent' : 'var(--border)'}`,
-            borderRadius:'14px', padding:'14px 8px', cursor:'pointer',
+            borderRadius:'16px', padding:'16px 8px', cursor:'pointer',
             transition:'all 0.15s', textAlign:'left',
-            boxShadow: filter === k.key ? '0 4px 14px rgba(0,0,0,0.15)' : '0 1px 3px rgba(0,0,0,0.04)', ...ss,
+            boxShadow: filter === k.key ? '0 4px 16px rgba(0,0,0,0.15)' : '0 1px 3px rgba(0,0,0,0.04)', ...ss,
           }}>
-            <div style={{ fontSize:'18px', marginBottom:'8px',
+            <div style={{ fontSize:'20px', marginBottom:'10px',
               background: filter === k.key ? 'rgba(255,255,255,0.2)' : 'var(--bg)',
-              width:'30px', height:'30px', borderRadius:'8px',
+              width:'34px', height:'34px', borderRadius:'10px',
               display:'flex', alignItems:'center', justifyContent:'center' }}>{k.icon}</div>
-            <div style={{ fontSize:'24px', fontWeight:'800', lineHeight:'1',
-              color: filter === k.key ? '#fff' : 'var(--text)', marginBottom:'4px' }}>{counts[k.key]}</div>
-            <div style={{ fontSize:'10px', fontWeight:'500', lineHeight:'1.3',
-              color: filter === k.key ? 'rgba(255,255,255,0.85)' : 'var(--text-muted)' }}>{k.label}</div>
+            <div style={{ fontSize:'28px', fontWeight:'800', lineHeight:'1',
+              color: filter === k.key ? '#fff' : 'var(--text)', marginBottom:'6px' }}>{counts[k.key]}</div>
+            <div style={{ fontSize:'11px', fontWeight:'600', lineHeight:'1.4',
+              color: filter === k.key ? 'rgba(255,255,255,0.88)' : 'var(--text-muted)' }}>{k.label}</div>
           </button>
         ))}
       </div>
 
       {/* Search */}
-      <div style={{ marginBottom:'16px' }}>
+      <div style={{ marginBottom:'18px' }}>
         <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder="🔍 ค้นหาชื่อนักเรียน, ชั้น..."
-          style={{ border:'1px solid var(--border)', borderRadius:'12px', padding:'10px 16px',
-            fontSize:'13px', outline:'none', background:'var(--surface)',
-            color:'var(--text)', maxWidth:'400px', width:'100%', ...ss }} />
+          style={{ border:'1px solid var(--border)', borderRadius:'12px', padding:'12px 18px',
+            fontSize:'15px', outline:'none', background:'var(--surface)',
+            color:'var(--text)', maxWidth:'420px', width:'100%', ...ss }} />
       </div>
 
       {/* Table */}
       <div style={{ background:'var(--surface)', borderRadius:'20px', border:'1px solid var(--border)', overflow:'hidden' }}>
-        <div style={{ padding:'16px 20px', borderBottom:'1px solid var(--border)',
+        <div style={{ padding:'18px 22px', borderBottom:'1px solid var(--border)',
           display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div style={{ fontWeight:'700', fontSize:'15px', color:'var(--text)', ...ss }}>รายการเอกสาร</div>
-          <span style={{ fontSize:'12px', color:'var(--text-muted)', background:'var(--bg)',
-            border:'1px solid var(--border)', borderRadius:'100px', padding:'2px 12px', ...ss }}>
+          <div style={{ fontWeight:'700', fontSize:'16px', color:'var(--text)', ...ss }}>รายการเอกสาร</div>
+          <span style={{ fontSize:'13px', color:'var(--text-muted)', background:'var(--bg)',
+            border:'1px solid var(--border)', borderRadius:'100px', padding:'3px 14px', ...ss }}>
             {filtered.length} รายการ
           </span>
         </div>
 
         {loading ? (
-          <div style={{ textAlign:'center', padding:'48px', color:'var(--text-muted)', ...ss }}>⏳ กำลังโหลด...</div>
+          <div style={{ textAlign:'center', padding:'60px', color:'var(--text-muted)', fontSize:'16px', ...ss }}>⏳ กำลังโหลด...</div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign:'center', padding:'48px' }}>
-            <div style={{ fontSize:'40px', marginBottom:'12px' }}>📄</div>
-            <div style={{ fontSize:'15px', color:'var(--text-muted)', marginBottom:'16px', ...ss }}>ยังไม่มีเอกสาร</div>
+          <div style={{ textAlign:'center', padding:'60px' }}>
+            <div style={{ fontSize:'48px', marginBottom:'14px' }}>📄</div>
+            <div style={{ fontSize:'16px', color:'var(--text-muted)', marginBottom:'18px', ...ss }}>ยังไม่มีเอกสาร</div>
             <button onClick={() => nav('/document/new')} style={{
               background:'var(--primary-light)', color:'var(--primary)',
-              border:'none', borderRadius:'10px', padding:'10px 20px',
-              fontSize:'14px', fontWeight:'600', cursor:'pointer', ...ss }}>
+              border:'none', borderRadius:'12px', padding:'12px 22px',
+              fontSize:'15px', fontWeight:'600', cursor:'pointer', ...ss }}>
               + สร้างเอกสารใหม่
             </button>
           </div>
@@ -173,8 +175,8 @@ export default function Dashboard() {
             <thead>
               <tr style={{ background:'var(--bg)' }}>
                 {['นักเรียน','ชั้น/เลขที่','ผู้สร้าง','วันที่','สถานะ',''].map(h => (
-                  <th key={h} style={{ padding:'10px 16px', textAlign:'left',
-                    fontSize:'11px', color:'var(--text-muted)', fontWeight:'600', ...ss }}>{h}</th>
+                  <th key={h} style={{ padding:'12px 18px', textAlign:'left',
+                    fontSize:'13px', color:'var(--text-muted)', fontWeight:'700', letterSpacing:'0.02em', ...ss }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -184,14 +186,16 @@ export default function Dashboard() {
                   onMouseEnter={e => e.currentTarget.style.background = 'var(--bg)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   onClick={() => nav(`/document/${doc.docId}`)}>
-                  <td style={{ padding:'14px 16px', fontWeight:'600', fontSize:'14px', color:'var(--text)', ...ss }}>{doc.studentName}</td>
-                  <td style={{ padding:'14px 16px', fontSize:'13px', color:'var(--text-muted)', ...ss }}>{doc.studentClass || doc.class} · {doc.studentNo || doc.no}</td>
-                  <td style={{ padding:'14px 16px', fontSize:'13px', color:'var(--text-muted)', ...ss }}>{doc.createdByName}</td>
-                  <td style={{ padding:'14px 16px', fontSize:'12px', color:'var(--text-muted)', whiteSpace:'nowrap', ...ss }}>
+                  <td style={{ padding:'16px 18px', fontWeight:'700', fontSize:'15px', color:'var(--text)', ...ss }}>{doc.studentName}</td>
+                  <td style={{ padding:'16px 18px', fontSize:'14px', color:'var(--text-muted)', ...ss }}>
+                    {doc.studentClass || doc.class} · {doc.studentNo || doc.no}
+                  </td>
+                  <td style={{ padding:'16px 18px', fontSize:'14px', color:'var(--text-muted)', ...ss }}>{doc.createdByName}</td>
+                  <td style={{ padding:'16px 18px', fontSize:'13px', color:'var(--text-muted)', whiteSpace:'nowrap', ...ss }}>
                     {fmtDate(doc.createdAt)}
                   </td>
-                  <td style={{ padding:'14px 16px' }}><StatusBadge status={doc.status} /></td>
-                  <td style={{ padding:'14px 16px', fontSize:'14px', color:'var(--text-muted)' }}>→</td>
+                  <td style={{ padding:'16px 18px' }}><StatusBadge status={doc.status} /></td>
+                  <td style={{ padding:'16px 18px', fontSize:'16px', color:'var(--text-muted)' }}>→</td>
                 </tr>
               ))}
             </tbody>

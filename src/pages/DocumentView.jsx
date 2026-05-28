@@ -15,15 +15,15 @@ import { format } from 'date-fns'
 import { showToast, updateToast } from '../components/Toast'
 import { th } from 'date-fns/locale'
 
-const ss  = { fontFamily:"'Sarabun',sans-serif" }
-const card = { background:'var(--surface)', borderRadius:'18px', border:'1px solid var(--border)', padding:'22px', marginBottom:'14px' }
+const ss  = { fontFamily:"'Sarabun',sans-serif", fontSize:'15px' }
+const card = { background:'var(--surface)', borderRadius:'18px', border:'1px solid var(--border)', padding:'26px', marginBottom:'16px' }
 const fmtD  = (d) => { try { return d ? format(new Date(d),'d MMMM yyyy',{locale:th}) : '-' } catch { return '-' } }
 const fmtDs = (d) => { try { return d ? format(new Date(d),'d/M/yyyy',{locale:th}) : '..../..../..........' } catch { return '-' } }
 
 const infoRow = (label, value) => value ? (
-  <div style={{ display:'flex', gap:'8px', marginBottom:'6px', fontSize:'13px' }}>
-    <span style={{ color:'var(--text-muted)', width:'150px', flexShrink:0, ...ss }}>{label}:</span>
-    <span style={{ color:'var(--text)', fontWeight:'500', ...ss }}>{value}</span>
+  <div style={{ display:'flex', gap:'8px', marginBottom:'8px', fontSize:'14px' }}>
+    <span style={{ color:'var(--text-muted)', width:'160px', flexShrink:0, ...ss }}>{label}:</span>
+    <span style={{ color:'var(--text)', fontWeight:'600', ...ss }}>{value}</span>
   </div>
 ) : null
 
@@ -238,14 +238,14 @@ export default function DocumentView() {
   ]
 
   return (
-    <div style={{ maxWidth:'900px', margin:'0 auto', padding:'28px 24px', ...ss }}>
+    <div style={{ maxWidth:'960px', margin:'0 auto', padding:'32px 28px', ...ss }}>
       {/* Header */}
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'18px', gap:'12px', flexWrap:'wrap' }}>
         <div style={{ display:'flex', alignItems:'flex-start', gap:'12px' }}>
           <button onClick={() => nav('/dashboard')} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-muted)', fontSize:'20px', marginTop:'4px' }}>←</button>
           <div>
             <div style={{ fontSize:'11px', color:'var(--text-muted)', marginBottom:'3px', ...ss }}>หน้าหลัก › เอกสาร</div>
-            <h1 style={{ fontSize:'20px', fontWeight:'700', color:'var(--text)', margin:'0 0 5px', display:'flex', alignItems:'center', gap:'10px', flexWrap:'wrap', ...ss }}>
+            <h1 style={{ fontSize:'22px', fontWeight:'800', color:'var(--text)', margin:'0 0 5px', display:'flex', alignItems:'center', gap:'10px', flexWrap:'wrap', ...ss }}>
               {doc.studentName} <StatusBadge status={doc.status}/>
             </h1>
             <div style={{ fontSize:'13px', color:'var(--text-muted)', ...ss }}>{fmtD(doc.createdAt)} · {safeStr(doc.createdByName)}</div>
@@ -380,16 +380,16 @@ export default function DocumentView() {
           {STEPS.map((s, i) => (
             <div key={i} style={{ display:'flex', alignItems:'center', flex:1 }}>
               <div style={{ textAlign:'center', flex:1 }}>
-                <div style={{ width:'32px', height:'32px', borderRadius:'50%', margin:'0 auto 6px',
-                  display:'flex', alignItems:'center', justifyContent:'center', fontSize:'14px',
+                <div style={{ width:'36px', height:'36px', borderRadius:'50%', margin:'0 auto 8px',
+                  display:'flex', alignItems:'center', justifyContent:'center', fontSize:'15px',
                   background: s.done ? '#22c55e' : 'var(--border)',
                   color: s.done ? '#fff' : 'var(--text-muted)', fontWeight:'700' }}>
                   {s.done ? '✓' : i+1}
                 </div>
-                <div style={{ fontSize:'10px', fontWeight:'600', lineHeight:'1.3',
+                <div style={{ fontSize:'11px', fontWeight:'700', lineHeight:'1.3',
                   color: s.done ? 'var(--text)' : 'var(--text-muted)', ...ss }}>{s.label}</div>
                 {s.done && s.name && (
-                  <div style={{ fontSize:'9px', color:'var(--text-muted)', marginTop:'2px', ...ss }}>{s.name}</div>
+                  <div style={{ fontSize:'10px', color:'var(--text-muted)', marginTop:'3px', ...ss }}>{s.name}</div>
                 )}
               </div>
               {i < STEPS.length - 1 && (
@@ -405,8 +405,8 @@ export default function DocumentView() {
         borderRadius:'14px', padding:'4px', border:'1px solid var(--border)' }}>
         {[['doc','เอกสาร 1+2'],['form3','เอกสาร 3'],['sig','ลายเซ็น'],['log','ประวัติ']].map(([k,l]) => (
           <button key={k} onClick={() => setTab(k)} style={{
-            flex:1, padding:'8px', borderRadius:'10px', border:'none', cursor:'pointer',
-            fontSize:'13px', fontWeight:'600', transition:'all 0.15s',
+            flex:1, padding:'10px', borderRadius:'10px', border:'none', cursor:'pointer',
+            fontSize:'14px', fontWeight:'600', transition:'all 0.15s',
             background: tab===k ? 'var(--surface)' : 'transparent',
             color: tab===k ? '#1d4ed8' : 'var(--text-muted)',
             boxShadow: tab===k ? '0 1px 4px rgba(0,0,0,0.08)' : 'none', ...ss }}>{l}</button>
