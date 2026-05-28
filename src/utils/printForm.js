@@ -20,8 +20,8 @@ export function buildPrintHTML(doc, logoUrl = null) {
   const suggestions = doc.suggestions || []
 
   const logoHtml = logoUrl
-    ? `<img src="${logoUrl}" style="width:56px;height:56px;object-fit:contain;" />`
-    : `<div style="width:56px;height:56px;background:#1d4ed8;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;">ด</div>`
+    ? `<img src="${logoUrl}" style="width:72px;height:72px;object-fit:contain;display:block;margin:0 auto 8px;" />`
+    : `<div style="width:72px;height:72px;background:#1d4ed8;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:800;margin:0 auto 8px;">ด</div>`
 
   const dot = (len = 40) => '&nbsp;' + '…'.repeat(Math.floor(len / 2))
   const blank = (px = 200) => `<span style="display:inline-block;border-bottom:1px solid #333;width:${px}px;"></span>`
@@ -100,12 +100,10 @@ export function buildPrintHTML(doc, logoUrl = null) {
 
 <!-- ═══════ หน้า 1: เอกสาร 1 ═══════ -->
 <div class="page">
-  <div class="header">
+  <div style="text-align:center;margin-bottom:14px;">
     ${logoHtml}
-    <div style="text-align:center;">
-      <h1>แบบรายงานการดูแลช่วยเหลือนักเรียน</h1>
-      <div style="font-size:12px;color:#555;">(สำหรับครูที่ปรึกษาและครูทั่วไป)</div>
-    </div>
+    <h1 style="font-size:16px;font-weight:700;margin:0 0 2px;">แบบรายงานการดูแลช่วยเหลือนักเรียน</h1>
+    <div style="font-size:12px;color:#555;">(สำหรับครูที่ปรึกษาและครูทั่วไป)</div>
   </div>
 
   <div class="info-row">
@@ -142,12 +140,10 @@ export function buildPrintHTML(doc, logoUrl = null) {
 
 <!-- ═══════ หน้า 2: เอกสาร 2 ═══════ -->
 <div class="page">
-  <div class="header">
+  <div style="text-align:center;margin-bottom:14px;">
     ${logoHtml}
-    <div style="text-align:center;">
-      <h1>แบบรายงานการดูแลช่วยเหลือนักเรียน</h1>
-      <h2>(การส่งต่อนักเรียนภายใน)</h2>
-    </div>
+    <h1 style="font-size:16px;font-weight:700;margin:0 0 2px;">แบบรายงานการดูแลช่วยเหลือนักเรียน</h1>
+    <h2 style="font-size:14px;font-weight:700;margin:0;">(การส่งต่อนักเรียนภายใน)</h2>
   </div>
 
   <div class="info-row">
@@ -195,16 +191,17 @@ export function buildPrintHTML(doc, logoUrl = null) {
           ${doc.asstDirSignedAt ? fmtDate(doc.asstDirSignedAt) : ''}
         </span>
       </div>
-      <div style="margin-bottom:4px;font-size:12px;">
-        เรียน หัวหน้างานฝ่ายต่างๆ
+      <div style="margin-bottom:8px;font-size:12px;">
+        เรียน <strong>${doc.targetDeptName || 'หัวหน้างานฝ่ายต่างๆ'}</strong>
       </div>
+      ${doc.asstDirNote ? `<div style="font-size:12px;background:#f8f9fa;border:1px solid #e9ecef;border-radius:4px;padding:8px;margin-bottom:8px;min-height:48px;line-height:1.6;">${doc.asstDirNote}</div>` : '<div style="min-height:48px;border:1px dashed #ccc;border-radius:4px;margin-bottom:8px;"></div>'}
       <div style="height:56px;border:1px dashed #ccc;border-radius:4px;background:#fafafa;margin:8px 0;
            display:flex;align-items:center;justify-content:center;">
         ${doc.asstDirSig ? `<img src="${doc.asstDirSig}" style="max-height:52px;max-width:180px;" />` : ''}
       </div>
       <div style="text-align:center;line-height:1.7;font-size:12px;">
         <div>ลงชื่อ (${doc.asstDirName || '................................'})</div>
-        <div style="font-weight:600;">ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน</div>
+        <div style="font-weight:600;">${doc.asstDirName || 'ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน'}</div>
         <div>ตำแหน่ง ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน</div>
       </div>
     </div>
@@ -244,12 +241,10 @@ export function buildPrintHTML(doc, logoUrl = null) {
 
 <!-- ═══════ หน้า 3: เอกสาร 3 ═══════ -->
 <div class="page">
-  <div class="header">
+  <div style="text-align:center;margin-bottom:14px;">
     ${logoHtml}
-    <div style="text-align:center;">
-      <h1>บันทึกการติดตามข้อมูลนักเรียน</h1>
-      <h2>ในระบบดูแลช่วยเหลือนักเรียน โรงเรียนดาราวิทยาลัย</h2>
-    </div>
+    <h1 style="font-size:16px;font-weight:700;margin:0 0 2px;">บันทึกการติดตามข้อมูลนักเรียน</h1>
+    <h2 style="font-size:14px;font-weight:700;margin:0;">ในระบบดูแลช่วยเหลือนักเรียน โรงเรียนดาราวิทยาลัย</h2>
   </div>
 
   <div class="info-row">

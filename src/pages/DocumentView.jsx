@@ -46,7 +46,7 @@ export default function DocumentView() {
   const [showEdit, setShowEdit] = useState(false)
   const [editForm, setEditForm] = useState({})
   const [showAssign, setShowAssign] = useState(false)
-  const [assignData, setAssignData] = useState({ dept:'', note:'' })
+  const [assignData, setAssignData] = useState({ dept:'', note:'', chiefNote:'' })
   const [showF3, setShowF3] = useState(false)
   const [f3Data, setF3Data] = useState({ note:'', records:[{session:1,date:'',issue:'',approach:''}] })
 
@@ -108,7 +108,7 @@ export default function DocumentView() {
   const doAssign = async () => {
     if (!assignData.dept) { alert('กรุณาเลือกฝ่าย'); return }
     setSaving(true); setShowAssign(false)
-    await assignChief({ docId:id, targetDept:assignData.dept, note:assignData.note,
+    await assignChief({ docId:id, targetDept:assignData.dept, note:assignData.note, chiefNote:assignData.chiefNote,
       byEmail:user.email, byName:profile?.name||user.displayName })
     loadAll(); setSaving(false)
   }
@@ -174,7 +174,7 @@ export default function DocumentView() {
             <h1 style={{ fontSize:'20px', fontWeight:'700', color:'var(--text)', margin:'0 0 5px', display:'flex', alignItems:'center', gap:'10px', flexWrap:'wrap', ...ss }}>
               {doc.studentName} <StatusBadge status={doc.status}/>
             </h1>
-            <div style={{ fontSize:'13px', color:'var(--text-muted)', ...ss }}>{fmtD(doc.createdAt)} · {doc.createdByName}</div>
+            <div style={{ fontSize:'13px', color:'var(--text-muted)', ...ss }}>{fmtD(doc.createdAt)} · {safeStr(doc.createdByName)}</div>
           </div>
         </div>
         <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', alignItems:'center' }}>
@@ -325,7 +325,7 @@ export default function DocumentView() {
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'4px 16px' }}>
             {infoRow('ชื่อ-สกุลนักเรียน', doc.studentName)}
-            {infoRow('ชั้น', `${doc.studentClass} เลขที่ ${doc.studentNo}`)}
+            {infoRow('ชั้น', `${doc.studentClass||doc.class||''} เลขที่ ${doc.studentNo||doc.no||''}`)}
             {infoRow('เลขประจำตัว', doc.studentId)}
             {infoRow('โทรศัพท์', doc.phone)}
             {infoRow('ที่อยู่', doc.address)}
@@ -363,7 +363,7 @@ export default function DocumentView() {
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'4px 16px' }}>
             {infoRow('วันที่', fmtD(doc.referralDate && !doc.referralDate.includes('T') ? doc.referralDate : doc.createdAt))}
-            {infoRow('เรียน', safeStr(doc.deptHeadName))}
+            {infoRow('เรียน', safeStr(doc.deptHeadName) || safeStr(doc.referralTo))}
             {infoRow('สิ่งที่ส่งมาด้วย', doc.attachment)}
           </div>
           {[['ปัญหาที่พบ', doc.problems],['การช่วยเหลือเบื้องต้น', doc.helpDone],
@@ -510,10 +510,20 @@ export default function DocumentView() {
                 {DEPT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
+            <div style={{ marginBottom:'14px' }}>
+              <label style={{ display:'block', fontSize:'12px', color:'var(--text-muted)', marginBottom:'5px', fontWeight:'600', ...ss }}>
+                บันทึก / สรุปผลการประชุม (ข้อความในกล่องซ้ายบนเอกสาร 2)
+              </label>
+              <textarea value={assignData.chiefNote} onChange={e => setAssignData(a => ({ ...a, chiefNote:e.target.value }))} rows={4}
+                placeholder="ระบุแนวทางการดำเนินการให้หัวหน้างานฝ่าย เช่น ให้ดำเนินการตามขั้นตอน..."
+                style={{ width:'100%', boxSizing:'border-box', border:'1px solid #bfdbfe', borderRadius:'10px',
+                  padding:'10px 12px', fontSize:'13px', outline:'none', background:'#eff6ff', color:'var(--text)', resize:'none', ...ss }}/>
+              <div style={{ fontSize:'11px', color:'#1d4ed8', marginTop:'4px', ...ss }}>ข้อความนี้จะแสดงในกล่องของผู้ช่วย ผอ. ในเอกสาร 2</div>
+            </div>
             <div style={{ marginBottom:'16px' }}>
-              <label style={{ display:'block', fontSize:'12px', color:'var(--text-muted)', marginBottom:'5px', fontWeight:'600', ...ss }}>บันทึก / สรุปผลการประชุม</label>
-              <textarea value={assignData.note} onChange={e => setAssignData(a => ({ ...a, note:e.target.value }))} rows={3}
-                placeholder="แนวทางที่กำหนดจากการประชุม..."
+              <label style={{ display:'block', fontSize:'12px', color:'var(--text-muted)', marginBottom:'5px', fontWeight:'600', ...ss }}>บันทึกเพิ่มเติม (ภายใน)</label>
+              <textarea value={assignData.note} onChange={e => setAssignData(a => ({ ...a, note:e.target.value }))} rows={2}
+                placeholder="หมายเหตุเพิ่มเติมสำหรับบันทึก..."
                 style={{ width:'100%', boxSizing:'border-box', border:'1px solid var(--border)', borderRadius:'10px',
                   padding:'10px 12px', fontSize:'13px', outline:'none', background:'var(--bg)', color:'var(--text)', resize:'none', ...ss }}/>
             </div>
