@@ -1,4 +1,4 @@
-import{R as $,f,t as v}from"./index-DsFwya6S.js";const x=i=>{if(!i)return"...........................";try{return f(new Date(i),"d MMMM yyyy",{locale:v})}catch{return i}},u=i=>{if(!i)return"........../........../...........";try{return f(new Date(i),"d/M/yyyy",{locale:v})}catch{return i}};function S(i,l=null){var p,o,r;const d=i.records||[],h=i.problems||[],c=i.helpDone||[],g=i.remaining||[],m=i.suggestions||[],a=l?`<img src="${l}" style="width:56px;height:56px;object-fit:contain;" />`:'<div style="width:56px;height:56px;background:#1d4ed8;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;">ด</div>',y=d.length>0?d.map((s,t)=>`
+import{R as $,f,t as v}from"./index-veJ1BPNF.js";const x=i=>{if(!i)return"...........................";try{return f(new Date(i),"d MMMM yyyy",{locale:v})}catch{return i}},u=i=>{if(!i)return"........../........../...........";try{return f(new Date(i),"d/M/yyyy",{locale:v})}catch{return i}};function D(i,p=null){var d,o,r;const l=i.records||[],g=i.problems||[],h=i.helpDone||[],m=i.remaining||[],c=i.suggestions||[],e=p?`<img src="${p}" style="width:72px;height:72px;object-fit:contain;display:block;margin:0 auto 8px;" />`:'<div style="width:72px;height:72px;background:#1d4ed8;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:800;margin:0 auto 8px;">ด</div>',y=l.length>0?l.map((s,t)=>`
         <tr>
           <td style="border:1px solid #333;padding:4px 6px;text-align:center;">${s.session||t+1}</td>
           <td style="border:1px solid #333;padding:4px 6px;white-space:nowrap;">${s.date||""}</td>
@@ -13,7 +13,7 @@ import{R as $,f,t as v}from"./index-DsFwya6S.js";const x=i=>{if(!i)return"......
       <div style="margin-bottom:10px;display:flex;gap:6px;">
         <span style="font-weight:600;white-space:nowrap;">${w+1}.</span>
         <span style="flex:1;border-bottom:1px solid #ccc;padding-bottom:2px;">${b||"&nbsp;"}</span>
-      </div>`).join(""),e=$[i.creatorRole]||i.advisorPosition||"ครูที่ปรึกษา";return`<!DOCTYPE html>
+      </div>`).join(""),a=$[i.creatorRole]||i.advisorPosition||"ครูที่ปรึกษา";return`<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -44,12 +44,10 @@ import{R as $,f,t as v}from"./index-DsFwya6S.js";const x=i=>{if(!i)return"......
 
 <!-- ═══════ หน้า 1: เอกสาร 1 ═══════ -->
 <div class="page">
-  <div class="header">
-    ${a}
-    <div style="text-align:center;">
-      <h1>แบบรายงานการดูแลช่วยเหลือนักเรียน</h1>
-      <div style="font-size:12px;color:#555;">(สำหรับครูที่ปรึกษาและครูทั่วไป)</div>
-    </div>
+  <div style="text-align:center;margin-bottom:14px;">
+    ${e}
+    <h1 style="font-size:16px;font-weight:700;margin:0 0 2px;">แบบรายงานการดูแลช่วยเหลือนักเรียน</h1>
+    <div style="font-size:12px;color:#555;">(สำหรับครูที่ปรึกษาและครูทั่วไป)</div>
   </div>
 
   <div class="info-row">
@@ -67,7 +65,7 @@ import{R as $,f,t as v}from"./index-DsFwya6S.js";const x=i=>{if(!i)return"......
   </div>
   <div class="info-row">
     <div class="info-field"><span class="info-label">ครูผู้ให้คำปรึกษา</span><span class="info-val" style="min-width:180px;">${i.advisorName||i.createdByName||""}</span></div>
-    <div class="info-field"><span class="info-label">ตำแหน่ง</span><span class="info-val" style="min-width:160px;">${e}</span></div>
+    <div class="info-field"><span class="info-label">ตำแหน่ง</span><span class="info-val" style="min-width:160px;">${a}</span></div>
   </div>
 
   <div style="margin:12px 0 6px;font-size:12px;color:#444;">บันทึกการดูแลช่วยเหลือ</div>
@@ -86,12 +84,10 @@ import{R as $,f,t as v}from"./index-DsFwya6S.js";const x=i=>{if(!i)return"......
 
 <!-- ═══════ หน้า 2: เอกสาร 2 ═══════ -->
 <div class="page">
-  <div class="header">
-    ${a}
-    <div style="text-align:center;">
-      <h1>แบบรายงานการดูแลช่วยเหลือนักเรียน</h1>
-      <h2>(การส่งต่อนักเรียนภายใน)</h2>
-    </div>
+  <div style="text-align:center;margin-bottom:14px;">
+    ${e}
+    <h1 style="font-size:16px;font-weight:700;margin:0 0 2px;">แบบรายงานการดูแลช่วยเหลือนักเรียน</h1>
+    <h2 style="font-size:14px;font-weight:700;margin:0;">(การส่งต่อนักเรียนภายใน)</h2>
   </div>
 
   <div class="info-row">
@@ -115,16 +111,16 @@ import{R as $,f,t as v}from"./index-DsFwya6S.js";const x=i=>{if(!i)return"......
     ปัญหาที่พบสรุปได้ดังนี้
   </div>
 
-  ${n(h)}
-
-  <div style="margin:8px 0 4px;font-weight:600;font-size:13px;">และได้ดำเนินการช่วยเหลือเบื้องต้นแล้วดังนี้</div>
-  ${n(c)}
-
-  <div style="margin:8px 0 4px;font-weight:600;font-size:13px;">แต่ยังคงมีปัญหาดังนี้</div>
   ${n(g)}
 
-  <div style="margin:8px 0 4px;font-weight:600;font-size:13px;">ข้อเสนอแนะอื่น ๆ</div>
+  <div style="margin:8px 0 4px;font-weight:600;font-size:13px;">และได้ดำเนินการช่วยเหลือเบื้องต้นแล้วดังนี้</div>
+  ${n(h)}
+
+  <div style="margin:8px 0 4px;font-weight:600;font-size:13px;">แต่ยังคงมีปัญหาดังนี้</div>
   ${n(m)}
+
+  <div style="margin:8px 0 4px;font-weight:600;font-size:13px;">ข้อเสนอแนะอื่น ๆ</div>
+  ${n(c)}
 
   <div style="margin:10px 0 4px;font-size:13px;">จึงเรียนมาเพื่อขอความร่วมมือในการดูแลช่วยเหลือแก้ไขปัญหาของนักเรียนดังกล่าว</div>
 
@@ -139,16 +135,17 @@ import{R as $,f,t as v}from"./index-DsFwya6S.js";const x=i=>{if(!i)return"......
           ${i.asstDirSignedAt?x(i.asstDirSignedAt):""}
         </span>
       </div>
-      <div style="margin-bottom:4px;font-size:12px;">
-        เรียน หัวหน้างานฝ่ายต่างๆ
+      <div style="margin-bottom:8px;font-size:12px;">
+        เรียน <strong>${i.targetDeptName||"หัวหน้างานฝ่ายต่างๆ"}</strong>
       </div>
+      ${i.asstDirNote?`<div style="font-size:12px;background:#f8f9fa;border:1px solid #e9ecef;border-radius:4px;padding:8px;margin-bottom:8px;min-height:48px;line-height:1.6;">${i.asstDirNote}</div>`:'<div style="min-height:48px;border:1px dashed #ccc;border-radius:4px;margin-bottom:8px;"></div>'}
       <div style="height:56px;border:1px dashed #ccc;border-radius:4px;background:#fafafa;margin:8px 0;
            display:flex;align-items:center;justify-content:center;">
         ${i.asstDirSig?`<img src="${i.asstDirSig}" style="max-height:52px;max-width:180px;" />`:""}
       </div>
       <div style="text-align:center;line-height:1.7;font-size:12px;">
         <div>ลงชื่อ (${i.asstDirName||"................................"})</div>
-        <div style="font-weight:600;">ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน</div>
+        <div style="font-weight:600;">${i.asstDirName||"ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน"}</div>
         <div>ตำแหน่ง ผู้ช่วยผู้อำนวยการฝ่ายกิจการนักเรียน</div>
       </div>
     </div>
@@ -165,7 +162,7 @@ import{R as $,f,t as v}from"./index-DsFwya6S.js";const x=i=>{if(!i)return"......
         </div>
         <div style="font-size:12px;line-height:1.7;">
           <div>(${i.createdByName||"........................................"})</div>
-          <div style="font-weight:600;">${e}</div>
+          <div style="font-weight:600;">${a}</div>
         </div>
       </div>
 
@@ -188,12 +185,10 @@ import{R as $,f,t as v}from"./index-DsFwya6S.js";const x=i=>{if(!i)return"......
 
 <!-- ═══════ หน้า 3: เอกสาร 3 ═══════ -->
 <div class="page">
-  <div class="header">
-    ${a}
-    <div style="text-align:center;">
-      <h1>บันทึกการติดตามข้อมูลนักเรียน</h1>
-      <h2>ในระบบดูแลช่วยเหลือนักเรียน โรงเรียนดาราวิทยาลัย</h2>
-    </div>
+  <div style="text-align:center;margin-bottom:14px;">
+    ${e}
+    <h1 style="font-size:16px;font-weight:700;margin:0 0 2px;">บันทึกการติดตามข้อมูลนักเรียน</h1>
+    <h2 style="font-size:14px;font-weight:700;margin:0;">ในระบบดูแลช่วยเหลือนักเรียน โรงเรียนดาราวิทยาลัย</h2>
   </div>
 
   <div class="info-row">
@@ -211,9 +206,9 @@ import{R as $,f,t as v}from"./index-DsFwya6S.js";const x=i=>{if(!i)return"......
   </div>
   <div class="info-row">
     <div class="info-field"><span class="info-label">ครูผู้ให้คำปรึกษา</span>
-    <span class="info-val" style="min-width:180px;">${((p=i.form3)==null?void 0:p.assignedTeacherName)||i.createdByName||""}</span></div>
+    <span class="info-val" style="min-width:180px;">${((d=i.form3)==null?void 0:d.assignedTeacherName)||i.createdByName||""}</span></div>
     <div class="info-field"><span class="info-label">ตำแหน่ง</span>
-    <span class="info-val" style="min-width:160px;">${((o=i.form3)==null?void 0:o.assignedTeacherPosition)||e}</span></div>
+    <span class="info-val" style="min-width:160px;">${((o=i.form3)==null?void 0:o.assignedTeacherPosition)||a}</span></div>
   </div>
 
   <div style="margin:14px 0 6px;font-weight:700;font-size:13px;">บันทึกการดูแลช่วยเหลือ (ติดตามผล)</div>
@@ -249,4 +244,4 @@ import{R as $,f,t as v}from"./index-DsFwya6S.js";const x=i=>{if(!i)return"......
 </div>
 
 </body>
-</html>`}export{S as buildPrintHTML};
+</html>`}export{D as buildPrintHTML};
