@@ -154,11 +154,12 @@ export default function DocumentView() {
     {value:'chief_religious',  label:'ฝ่ายศาสนกิจ'},
   ]
 
+  const safeStr = (v) => (!v || Array.isArray(v) || (typeof v==='string' && v.startsWith('['))) ? '' : String(v)
   const STEPS = [
-    {label:'สร้างเอกสาร', done:true, name:doc.createdByName, date:doc.createdAt},
-    {label:'หัวหน้าแผนกเซ็น', done:!!doc.deptHeadSig, name:doc.deptHeadName, date:doc.deptHeadSignedAt},
-    {label:'ผู้ช่วย ผอ. เซ็น', done:!!doc.asstDirSig, name:doc.asstDirName, date:doc.asstDirSignedAt},
-    {label:'มอบหมายฝ่าย', done:!!doc.targetDept, name:ROLE_LABELS[doc.targetDept]||doc.targetDept, date:null},
+    {label:'สร้างเอกสาร', done:true, name:safeStr(doc.createdByName), date:doc.createdAt},
+    {label:'หัวหน้าแผนกเซ็น', done:!!doc.deptHeadSig, name:safeStr(doc.deptHeadName), date:doc.deptHeadSignedAt},
+    {label:'ผู้ช่วย ผอ. เซ็น', done:!!doc.asstDirSig, name:safeStr(doc.asstDirName), date:doc.asstDirSignedAt},
+    {label:'มอบหมายฝ่าย', done:!!doc.targetDept, name:safeStr(ROLE_LABELS[doc.targetDept]||doc.targetDept), date:null},
     {label:'ดำเนินการ/สมบูรณ์', done:doc.status==='completed', name:null, date:null},
   ]
 
@@ -361,8 +362,8 @@ export default function DocumentView() {
             <span style={{ fontWeight:'700', fontSize:'14px', color:'var(--text)', ...ss }}>แบบส่งต่อภายใน</span>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'4px 16px' }}>
-            {infoRow('วันที่', fmtD(doc.referralDate || doc.createdAt))}
-            {infoRow('เรียน', doc.deptHeadName)}
+            {infoRow('วันที่', fmtD(doc.referralDate && !doc.referralDate.includes('T') ? doc.referralDate : doc.createdAt))}
+            {infoRow('เรียน', safeStr(doc.deptHeadName))}
             {infoRow('สิ่งที่ส่งมาด้วย', doc.attachment)}
           </div>
           {[['ปัญหาที่พบ', doc.problems],['การช่วยเหลือเบื้องต้น', doc.helpDone],
