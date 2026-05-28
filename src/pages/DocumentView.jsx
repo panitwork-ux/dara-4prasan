@@ -375,25 +375,26 @@ export default function DocumentView() {
 
       {/* Timeline */}
       <div style={{ ...card, marginBottom:'18px', overflowX:'auto' }}>
-        <div style={{ fontWeight:'700', fontSize:'14px', color:'var(--text)', marginBottom:'16px', ...ss }}>เส้นทางเอกสาร</div>
-        <div style={{ display:'flex', minWidth:'600px' }}>
+        <div style={{ fontWeight:'700', fontSize:'15px', color:'var(--text)', marginBottom:'20px', ...ss }}>เส้นทางเอกสาร</div>
+        <div style={{ display:'flex', alignItems:'flex-start', minWidth:'700px' }}>
           {STEPS.map((s, i) => (
-            <div key={i} style={{ display:'flex', alignItems:'center', flex:1 }}>
+            <div key={i} style={{ display:'flex', alignItems:'flex-start', flex:1 }}>
               <div style={{ textAlign:'center', flex:1 }}>
-              <div style={{ width:'36px', height:'36px', borderRadius:'50%', margin:'0 auto 8px',
-                  display:'flex', alignItems:'center', justifyContent:'center', fontSize:'15px',
+                <div style={{ width:'40px', height:'40px', borderRadius:'50%', margin:'0 auto 10px',
+                  display:'flex', alignItems:'center', justifyContent:'center', fontSize:'16px',
                   background: s.done ? '#22c55e' : '#cbd5e1',
-                  color: s.done ? '#fff' : '#475569', fontWeight:'700' }}>
+                  color: s.done ? '#fff' : '#475569', fontWeight:'800' }}>
                   {s.done ? '✓' : i+1}
                 </div>
-                <div style={{ fontSize:'11px', fontWeight:'700', lineHeight:'1.3',
-                  color: s.done ? 'var(--text)' : '#475569', ...ss }}>{s.label}</div>
+                <div style={{ fontSize:'12px', fontWeight:'700', lineHeight:'1.4',
+                  color: s.done ? 'var(--text)' : '#475569', minHeight:'32px', ...ss }}>{s.label}</div>
                 {s.done && s.name && (
-                  <div style={{ fontSize:'11px', fontWeight:'600', color:'var(--text-muted)', marginTop:'3px', ...ss }}>{s.name}</div>
+                  <div style={{ fontSize:'11px', fontWeight:'600', color:'var(--text-muted)', marginTop:'4px', ...ss }}>{s.name}</div>
                 )}
               </div>
               {i < STEPS.length - 1 && (
-                <div style={{ width:'16px', height:'2px', background: s.done ? '#22c55e' : 'var(--border)', flexShrink:0 }}/>
+                <div style={{ width:'20px', flexShrink:0, height:'2px',
+                  background: s.done ? '#22c55e' : '#cbd5e1', marginTop:'19px' }}/>
               )}
             </div>
           ))}
