@@ -380,14 +380,14 @@ export default function DocumentView() {
           {STEPS.map((s, i) => (
             <div key={i} style={{ display:'flex', alignItems:'center', flex:1 }}>
               <div style={{ textAlign:'center', flex:1 }}>
-                <div style={{ width:'36px', height:'36px', borderRadius:'50%', margin:'0 auto 8px',
+              <div style={{ width:'36px', height:'36px', borderRadius:'50%', margin:'0 auto 8px',
                   display:'flex', alignItems:'center', justifyContent:'center', fontSize:'15px',
-                  background: s.done ? '#22c55e' : 'var(--border)',
-                  color: s.done ? '#fff' : 'var(--text-muted)', fontWeight:'700' }}>
+                  background: s.done ? '#22c55e' : '#cbd5e1',
+                  color: s.done ? '#fff' : '#475569', fontWeight:'700' }}>
                   {s.done ? '✓' : i+1}
                 </div>
                 <div style={{ fontSize:'11px', fontWeight:'700', lineHeight:'1.3',
-                  color: s.done ? 'var(--text)' : 'var(--text-muted)', ...ss }}>{s.label}</div>
+                  color: s.done ? 'var(--text)' : '#475569', ...ss }}>{s.label}</div>
                 {s.done && s.name && (
                   <div style={{ fontSize:'10px', color:'var(--text-muted)', marginTop:'3px', ...ss }}>{s.name}</div>
                 )}
